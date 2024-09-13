@@ -1,63 +1,62 @@
 import React, { useState, useEffect } from 'react';
+import './Books.css';
 
 const Books = () => {
-    const [data, setData] = useState([]);
-    const [filter, setFilter] = useState([]);
+    const [books, setBooks] = useState([]);
     const [loading, setLoading] = useState(false);
+    const [error, setError] = useState(null);
 
     useEffect(() => {
-        let componentMounted = true;
         const getBooks = async () => {
             setLoading(true);
+            setError(null);
             try {
-                console.log("Fetching books...");
-                const response = await fetch("http://127.0.0.1:8000/api/books");
-                console.log("Response status:", response.status);
-                if (componentMounted) {
-                    const booksData = await response.json();
-                    console.log("Books data received:", booksData);
-                    setData(booksData);
-                    setFilter(booksData);
-                    setLoading(false);
+                const response = await fetch("http://127.0.0.1:8000/api/books/recent");
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                const data = await response.json();
+
+                if (data && data.books && Array.isArray(data.books)) {
+                    setBooks(data.books);
+                } else {
+                    throw new Error('Unexpected data format');
                 }
             } catch (error) {
                 console.error("Error fetching books:", error);
+                setError(error.message);
+            } finally {
                 setLoading(false);
             }
         };
         getBooks();
-        return () => {
-            componentMounted = false;
-        };
     }, []);
 
-    useEffect(() => {
-        console.log("Current data state:", data);
-        console.log("Current filter state:", filter);
-    }, [data, filter]);
+    const chunkArray = (arr, size) => {
+        return Array.from({ length: Math.ceil(arr.length / size) }, (v, i) =>
+            arr.slice(i * size, i * size + size)
+        );
+    };
 
-    if (loading) {
-        return <div>Loading...</div>;
-    }
+    if (loading) return <div className="loading">Loading...</div>;
+    if (error) return <div className="error">Error: {error}</div>;
+
+    const bookRows = chunkArray(books, 4);
 
     return (
-        <div>
-            <div className="container">
-                <div className="row">
-                    <h1>Roman Policier</h1>
-                    <div>
-                        {filter.length > 0 ? (
-                            filter.map((book, index) => (
-                                <div key={index}>
-                                    <h2>{book.title}</h2>
-                                    <p>{book.description}</p>
-                                </div>
-                            ))
-                        ) : (
-                            <p>No books available (Filter length: {filter.length})</p>
-                        )}
+        <div className="books-page">
+            <h1 className="page-title">Recent Published Books</h1>
+            <div className="books-container">
+                {bookRows.map((row, rowIndex) => (
+                    <div key={rowIndex} className="book-row">
+                        {row.map((book) => (
+                            <div key={book.id} className="book-item">
+                                <img src={book.image} alt={book.title} />
+                                <h3>{book.title}</h3>
+                            </div>
+                        ))}
                     </div>
-                </div>
+                ))}
             </div>
         </div>
     );
