@@ -1,8 +1,7 @@
 import React from 'react';
 import bgImage from '../Assets/bg.jpg';
-import Books from './Books';
 
-function Home() {
+function HomeBanner() {
     return (
         <div className="hero">
             <div className="card bg-dark text-white border-0">
@@ -17,10 +16,9 @@ function Home() {
                     </div>
                 </div>
             </div>
-            <Books/>
         </div>
     )
 }
 
-export default Home;
+export default HomeBanner;
 

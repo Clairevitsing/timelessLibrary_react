@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import './Books.css';
+import './RecentBooks.css';
 
 const Books = () => {
     const [books, setBooks] = useState([]);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
+    let componentMounted = true;
 
     useEffect(() => {
         const getBooks = async () => {

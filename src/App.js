@@ -1,15 +1,32 @@
-
-import './App.css';
-import Navbar from "./Components/Navbar";
-import Home from "./Components/Home";
+import React from "react";
+import { BrowserRouter, Routes, Route } from "react-router-dom";
+import Navbar from "./Components/Navbar/Navbar";
+import Footer from "./Components/Footer/Footer";
+import Home from "./Pages/Home";
+import Book from "./Pages/Book";
+import BookCategory from "./Pages/BookCategory";
+import Contact from "./Pages/Contact";
+import "./App.css";
 
 function App() {
   return (
-    <>
-        <Navbar/>
-        <Home/>
-
-    </>
+    <div>
+      <BrowserRouter>
+        <Navbar />
+        <Routes>
+          <Route path="/" element={<Home />} />
+          <Route path="/book" element={<Book />} />
+          <Route path="category/voluptaten" element={<BookCategory />} />
+          <Route path="category/evenist" element={<BookCategory />} />
+          <Route path="category/porro" element={<BookCategory />} />
+          <Route path="category/vel" element={<BookCategory />} />
+          <Route path="category/quo" element={<BookCategory />} />
+          <Route path="category/rerum" element={<BookCategory />} />
+          <Route path="/contact" element={<Contact />} />
+        </Routes>
+        <Footer />
+      </BrowserRouter>
+    </div>
   );
 }
 
