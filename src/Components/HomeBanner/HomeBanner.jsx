@@ -1,5 +1,6 @@
 import React from 'react';
 import bgImage from '../Assets/bg.jpg';
+import './HomeBanner.css';
 
 function HomeBanner() {
     return (

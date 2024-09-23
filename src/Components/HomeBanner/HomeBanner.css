@@ -1,0 +1,47 @@
+.hero {
+    position: relative;
+    display: block;
+}
+
+.card {
+    height: 550px;
+    /* Maintain the height as set for the image */
+}
+
+.card-img {
+    width: 100%;
+    /* Ensure the image covers the card completely */
+    height: 100%;
+    /* Full height of the card */
+    object-fit: cover;
+    /* Cover the entire space without distorting the image */
+}
+
+.card-img-overlay {
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    padding: 1rem;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+.container {
+    max-width: 900px;
+    /* or any max-width or padding you prefer */
+}
+
+.card-title {
+    font-size: 48px;
+    /* display-3, typically around 48px */
+    font-weight: 700;
+    /* fw-bolder */
+}
+
+.card-text {
+    font-size: 24px;
+    /* fs-2, making it prominently larger but not as large as the title */
+}

@@ -1,7 +1,7 @@
 import React from 'react'
 import { Link } from 'react-router-dom'; 
 import './Navbar.css';
-import logo from '../../Assets/logo.png';
+import logo from '../Assets/logo.png';
 
 
 const Navbar = () => {
@@ -43,8 +43,10 @@ const Navbar = () => {
                     <li><Link className="dropdown-item" to="/category/police">Police</Link></li>
                   </ul>
                 </li>
-                <li className="nav-item px-2">
-                  <a className="nav-link" href="#">Contact</a>
+              <li className="nav-item px-2">
+                <Link className="nav-link" to="/contact"> 
+                    Contact
+                </Link>
                 </li>
                 <form className="d-flex" role="search">
                   <input className="form-control me-2" type="search" placeholder="Search" aria-label="Search"/>
@@ -52,8 +54,9 @@ const Navbar = () => {
                 </form>
               </ul>
               <div className="buttons">
-                <a href="" className="btn btn-outline-success">
-                  <i  className="fa fa-sign-in me-1"></i>Login</a>
+                <Link to="/loginSignup" className="btn btn-outline-success">
+                  <i className="fa fa-sign-in me-1"></i>Login
+                </Link>
                 {/* <a href="" className="btn btn-outline-success ms-2">
                   <i  className="fa fa-user-plus me-1"></i>Register</a> */}
                 <a href="" className="btn btn-outline-success ms-2">

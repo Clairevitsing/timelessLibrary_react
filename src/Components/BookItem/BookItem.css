@@ -1,0 +1,25 @@
+.book-item-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    /* Ensures it takes at least the full height of the viewport */
+    text-align: center;
+    /* Centers the text elements */
+}
+
+.book-item-container img {
+    max-width: 100%;
+    /* Ensures the image is responsive */
+    height: auto;
+    margin-bottom: 20px;
+    /* Adds spacing below the image */
+}
+
+.btn {
+    margin: 10px;
+    /* Adds spacing around buttons */
+    padding: 10px 20px;
+    /* Pads buttons for better touch */
+}
