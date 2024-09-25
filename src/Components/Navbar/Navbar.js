@@ -54,7 +54,7 @@ const Navbar = () => {
                 </form>
               </ul>
               <div className="buttons">
-                <Link to="/loginSignup" className="btn btn-outline-success">
+                <Link to="/login" className="btn btn-outline-success">
                   <i className="fa fa-sign-in me-1"></i>Login
                 </Link>
                 {/* <a href="" className="btn btn-outline-success ms-2">

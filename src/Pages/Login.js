@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom'; 
-import './CSS/LoginSignup.css'; 
+import './CSS/Login.css'; 
 
-const LoginSignup = () => {
+const Login = () => {
   // State for managing input values
   const [form, setForm] = useState({
     email: '',
@@ -35,11 +35,11 @@ const LoginSignup = () => {
   };
 
   return (
-    <div className="loginsignup">
-      <div className="loginsignup-container">
+    <div className="login">
+      <div className="login-container">
         <form onSubmit={handleSubmit}>
           <h1>Login</h1>
-          <div className="loginsignup-fields">
+          <div className="login-fields">
             <input
               type="email"
               placeholder='Email Address'
@@ -57,7 +57,7 @@ const LoginSignup = () => {
               required
             />
           </div>
-          <div className="loginsignup-agree">
+          <div className="login-agree">
             <input
               type="checkbox"
               name="agreeToTerms"
@@ -70,8 +70,8 @@ const LoginSignup = () => {
             </label>
           </div>
           <button type="submit">Continue</button>
-          <p className="loginsignup-login">
-            Don't have an account? <Link to="/signup" className="login-link">Signup here</Link>
+          <p className="login-signup">
+            Don't have an account? <Link to="/register" className="login-link">Signup here</Link>
           </p>
         </form>
       </div>
@@ -79,5 +79,5 @@ const LoginSignup = () => {
   );
 }
 
-export default LoginSignup;
+export default Login;
 
