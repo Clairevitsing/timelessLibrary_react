@@ -1,0 +1,13 @@
+/* Navbar */
+.navbar-nav a {
+    font-size: 18px;
+}
+
+.navbar-welcome {
+    font-size: 0.75rem;
+}
+
+.selected {
+    font-weight: bold;
+    text-decoration: underline;
+}

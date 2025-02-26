@@ -1,0 +1,109 @@
+/* Container for the search bar using Flexbox */
+.search-container {
+    display: flex;
+    justify-content: center;
+    /* Centers horizontally */
+    padding: 20px;
+}
+
+.search-form {
+    width: 100%;
+    /* Full width of the form within the container */
+    max-width: 500px;
+    /* Maximum width of the form */
+}
+
+/* Container for the button*/
+.addBook {
+    display: flex;
+    justify-content: center;
+    /* Aligns the button to the right */
+    padding: 20px;
+    /* Adds some padding around the container */
+}
+
+/* Container styling */
+.container {
+    padding: 20px;
+    background-color: #f8f9fa;
+    /* Light grey background for the container */
+}
+
+/* Row and column spacing */
+.row {
+    margin-right: -15px;
+    margin-left: -15px;
+}
+
+.col-md-4,
+.col-sm-6,
+.col-lg-3 {
+    padding-right: 15px;
+    padding-left: 15px;
+}
+
+/* Card styling */
+.card {
+    display: flex;
+    flex-direction: column;
+    /* Ensures the content flows vertically */
+    justify-content: space-between;
+    /* Distributes space around items */
+    height: 450px;
+    /* Fixed height for all cards */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    /* Adds shadow for depth */
+    transition: transform 0.3s ease-in-out;
+    /* Smooth transform on hover */
+}
+
+.card:hover {
+    transform: translateY(-5px) scale(1.05);
+    /* Slight lift effect on hover */
+}
+
+.card-img-top {
+    width: 100%;
+    height: 250px;
+    object-fit: cover;
+    /* Ensures images cover the card area well */
+}
+
+.card-body {
+    flex-grow: 1;
+    /* Allows the body to expand to fill available space */
+    padding: 15px;
+    display: flex;
+    flex-direction: column;
+}
+
+.card-title {
+    margin-bottom: 10px;
+    /* More space under the title */
+}
+
+ul {
+    list-style-type: none;
+    /* Removes bullet points from lists */
+    padding: 0;
+    margin: 0;
+    flex-grow: 1;
+    /* Allows the list to expand and use available space */
+}
+
+li {
+    padding: 5px 0;
+    /* Adds vertical padding to each list item */
+    border-bottom: 1px solid #eee;
+    /* Adds a separator */
+}
+
+li:last-child {
+    border-bottom: none;
+    /* Removes border from the last item */
+}
+
+.btn-primary {
+    margin-top: auto;
+    /* Pushes the button to the bottom of the card */
+}
