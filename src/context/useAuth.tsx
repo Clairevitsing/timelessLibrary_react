@@ -10,7 +10,7 @@ type UserContextType = {
     user: UserProfile | null;
     token: string | null;
     registerUser: (firstName: string, lastName: string, userName: string, phoneNumber: string, email: string, password: string, roles: string[], subStartDate: string, subEndDate:string) => Promise<void>;
-    loginUser: (userName:string, email: string, password: string) => Promise<void>;
+    loginUser: (email: string, password: string) => Promise<void>;
     logout: () => void;
     isLoggedIn: () => boolean;
 };
@@ -41,24 +41,26 @@ const loginUser = async (email: string, password: string) => {
   try {
     const res = await loginAPI(email, password);
     
-    if (!res || !res.data) {
+    if (!res) {
       throw new Error("Invalid response from API");
     }
-    
-    const userData = res.data;
-    const token = userData.token;
+
+    const { token } = res;
     
     localStorage.setItem("token", token);
+
+    try {
+      const decodedToken = jwtDecode<UserDecodedToken>(token);
+      console.log("Decoded Token:", decodedToken);
+    } catch (decodeError) {
+      console.error("Failed to decode JWT:", decodeError);
+    }
     
-    // Utiliser jwtDecode au lieu de jwt_decode
-    const decodedToken = jwtDecode<UserDecodedToken>(token);
-    console.log("Decoded Token:", decodedToken);
-    
-    // Le reste de votre code...
   } catch (e) {
     console.error("Login error:", e);
   }
 };
+
 
     const registerUser = async (
         firstName: string,

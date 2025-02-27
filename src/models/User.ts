@@ -9,7 +9,7 @@ export type UserDecodedToken = {
   userName?: string;
   email?: string;
   roles?: string[];
-  password: string;
+  token: string;
 }
 
 export type UserProfile = {
