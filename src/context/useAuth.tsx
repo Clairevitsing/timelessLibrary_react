@@ -1,9 +1,10 @@
 import React, { createContext, useState, useEffect, useContext } from "react";
-import { UserProfile, UserProfileToken } from "../models/User";
+import { UserProfile, UserDecodedToken } from "../models/User";
 import { useNavigate } from "react-router-dom";
 import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { loginAPI, registerAPI } from "../services/AuthService";
+import { jwtDecode } from "jwt-decode"; 
 
 type UserContextType = {
     user: UserProfile | null;
@@ -35,34 +36,30 @@ export const UserProvider: React.FC<Props> = ({ children }) => {
         setIsReady(true);
     }, []);
 
-    const loginUser = async (userName: string, email: string, password: string) => {
-        try {
-            const res = await loginAPI(email, password);
-            if (res && res.data) {
-                const userData: UserProfileToken = res.data;
-                localStorage.setItem("token", userData.token);
-                const userObj: UserProfile = {
-                    email: userData.email,
-                    password: userData.password,
-                    // These fields are not provided by loginAPI
-                    firstName: "",  
-                    lastName: "",   
-                    userName:userData.userName,   
-                    phoneNumber: "",
-                    roles: [""],
-                    subStartDate: "",
-                    subEndDate: ""
-                };
-                localStorage.setItem("user", JSON.stringify(userObj));
-                setToken(userData.token);
-                setUser(userObj);
-                toast.success("Login Success!");
-                navigate("/");
-            }
-        } catch (e) {
-            toast.warning("Server error occurred");
-        }
-    };
+
+const loginUser = async (email: string, password: string) => {
+  try {
+    const res = await loginAPI(email, password);
+    
+    if (!res || !res.data) {
+      throw new Error("Invalid response from API");
+    }
+    
+    const userData = res.data;
+    const token = userData.token;
+    
+    localStorage.setItem("token", token);
+    
+    // Utiliser jwtDecode au lieu de jwt_decode
+    const decodedToken = jwtDecode<UserDecodedToken>(token);
+    console.log("Decoded Token:", decodedToken);
+    
+    // Le reste de votre code...
+  } catch (e) {
+    console.error("Login error:", e);
+  }
+};
+
     const registerUser = async (
         firstName: string,
         lastName: string,

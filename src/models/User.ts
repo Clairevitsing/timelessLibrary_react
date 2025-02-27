@@ -5,6 +5,13 @@ export type UserProfileToken = {
     token: string;
 }
 
+export type UserDecodedToken = {
+  userName?: string;
+  email?: string;
+  roles?: string[];
+  password: string;
+}
+
 export type UserProfile = {
     firstName: string,
     lastName: string,

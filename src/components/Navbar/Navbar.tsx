@@ -1,22 +1,46 @@
-import React, { useEffect }  from 'react';
+import React, { useEffect, useState } from 'react';
 import { Navbar, Nav, NavDropdown, Form, FormControl, Button, Container } from 'react-bootstrap';
 import { Link } from 'react-router-dom';
 import './Navbar.css';
 import logo from '../../assets/logo.png';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faSignInAlt,faSignOutAlt, faShoppingCart,faUser} from '@fortawesome/free-solid-svg-icons';
-import { useAuth } from '../../context/useAuth'
-import {useSelector} from "react-redux"
+import { faSignInAlt, faSignOutAlt, faShoppingCart, faUser } from '@fortawesome/free-solid-svg-icons';
+import { useAuth } from '../../context/useAuth';
+import { useSelector } from "react-redux";
+import { jwtDecode } from "jwt-decode"; 
 
-  
 const NavbarComponent: React.FC = () => {
-  const { user, logout, isLoggedIn } = useAuth(); 
+  const { user, logout, isLoggedIn } = useAuth();
   const { cartBookIds } = useSelector((state: any) => state.cart || { cartBookIds: [] });
-
+  const [username, setUsername] = useState<string>("");
 
   useEffect(() => {
     console.log("Current User State:", user);
-  }, [user]); 
+    
+    // Récupérer le nom d'utilisateur
+    if (user && user.userName) {
+      // Si user est un objet avec userName, l'utiliser directement
+      setUsername(user.userName);
+    } else {
+      // Sinon essayer de récupérer à partir du token dans localStorage
+      try {
+        const token = localStorage.getItem("token");
+        if (token) {
+          const decodedToken: any = jwtDecode(token); // Utilisation de jwtDecode au lieu de jwt_decode
+          // Chercher le nom d'utilisateur dans différents champs possibles du token
+          const extractedUsername = decodedToken.userName || 
+                                    decodedToken.username || 
+                                    decodedToken.name || 
+                                    decodedToken.sub || 
+                                    decodedToken.email;
+          setUsername(extractedUsername || "Utilisateur");
+        }
+      } catch (error) {
+        console.error("Erreur lors du décodage du token:", error);
+        setUsername("Utilisateur");
+      }
+    }
+  }, [user]);
   
   return (
     <Navbar bg="light" expand="lg" className="py-3 shadow-sm">
@@ -40,10 +64,6 @@ const NavbarComponent: React.FC = () => {
             </NavDropdown>
             <Nav.Link as={Link} to="/contact">Contact</Nav.Link>
           </Nav>
-          <Form className="d-flex">
-            <FormControl type="search" placeholder="Search" className="me-2" aria-label="Search" />
-            <Button variant="outline-success" type="submit">Search</Button>
-          </Form>
           <Nav>
             {isLoggedIn() ? (
               <>
@@ -51,9 +71,9 @@ const NavbarComponent: React.FC = () => {
                   <FontAwesomeIcon icon={faSignOutAlt} className="me-1" />
                   Logout
                 </Nav.Link>
-                <span className="navbar-text">
+                <span className="navbar-text ms-2">
                   <FontAwesomeIcon icon={faUser} className="me-1" />
-                  Welcome, {user?.userName}
+                  Welcome, {username}
                 </span>
               </>
             ) : (
@@ -61,23 +81,14 @@ const NavbarComponent: React.FC = () => {
                 <FontAwesomeIcon icon={faSignInAlt} className="me-1" /> Login
               </Nav.Link>
             )}
-            {/* <Nav.Link href="#" className="btn btn-outline-success ms-2">
-              <FontAwesomeIcon icon={faShoppingCart} className="me-1" />Cart (0)
-            </Nav.Link> */}
             <Nav.Link
                 as={Link}
                 to="/cart"
-                className={window.location.pathname === '/cart' ? 'selected' : ''}
+                className={`ms-3 ${window.location.pathname === '/cart' ? 'selected' : ''}`}
               >
                 <FontAwesomeIcon icon={faShoppingCart} className="me-1" />
                 Cart ({cartBookIds?.length || 0})
               </Nav.Link>
-
-            {/* <Button style={{ width: "3rem", height: "3rem", position: "relative" }} variant="outline-primary" className="rounded-circle">
-              <FontAwesomeIcon icon={faShoppingCart} className="me-1" />
-              <div className="rounded-circle bg-danger d-flex justify-content-center align-items-center" style={{ color: "white", width: "1.5rem", height: "1.5rem", position: "absolute", bottom: 0, right: 0, transform:"translate(25%,25%)"}}>0</div>
-          <div className="rounded-circle bg-danger d-flex justify-content-center align-items-center"></div>
-           </Button> */}
           </Nav>
         </Navbar.Collapse>
       </Container>
