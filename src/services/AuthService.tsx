@@ -1,6 +1,6 @@
 import axios from "axios";
 import { handleError } from "../helpers/ErrorHandler";
-import { UserDecodedToken, UserProfile } from "../models/User";
+import { UserProfile } from "../models/User";
 
 // Définition de l'URL de base de l'API
 const BASE_API_URL = "http://127.0.0.1:8000/api";
@@ -11,7 +11,7 @@ export const loginAPI = async (email: string, password: string): Promise<{ token
         console.log("Login request:", { email, password });
 
         const response = await axios.post<{ token: string }>(`${BASE_API_URL}/login_check`, {
-            email: email, // ✅ Vérifier que l'API attend bien "email"
+            email: email, 
             password: password
         });
 
@@ -20,14 +20,15 @@ export const loginAPI = async (email: string, password: string): Promise<{ token
         }
 
         console.log("Login success:", response.data);
-        return response.data; // ✅ Retourne bien un objet avec { token }
+        return response.data; 
     } catch (error: any) {
         if (error.response) {
             console.error("Login failed:", error.response.data);
         } else {
             console.error("Login error:", error.message);
         }
-        return undefined; // ✅ Gestion explicite des erreurs
+        //  Gestion explicite des erreurs
+        return undefined; 
     }
 };
 
