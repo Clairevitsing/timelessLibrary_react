@@ -38,28 +38,47 @@ export const UserProvider: React.FC<Props> = ({ children }) => {
 
 
 const loginUser = async (email: string, password: string) => {
-  try {
-    const res = await loginAPI(email, password);
-    
-    if (!res) {
-      throw new Error("Invalid response from API");
-    }
-
-    const { token } = res;
-    
-    localStorage.setItem("token", token);
-
     try {
-      const decodedToken = jwtDecode<UserDecodedToken>(token);
-      console.log("Decoded Token:", decodedToken);
-    } catch (decodeError) {
-      console.error("Failed to decode JWT:", decodeError);
+        const res = await loginAPI(email, password);
+        if (!res) {
+            throw new Error("Invalid response from API");
+        }
+
+        const { token } = res;
+        localStorage.setItem("token", token);
+        setToken(token);
+
+        try {
+            const decodedToken = jwtDecode<UserDecodedToken>(token);
+            console.log("Decoded Token:", decodedToken);
+
+           const userData: UserProfile = {
+                                            firstName: "",  
+                                            lastName: "",  
+                                            userName: decodedToken.userName ?? "",
+                                            phoneNumber: "", 
+                                            email: decodedToken.email ?? "",
+                                            password: "",   
+                                            roles: decodedToken.roles ?? [],
+                                            subStartDate: "",
+                                            subEndDate: ""  
+                                        };
+
+            setUser(userData);
+            localStorage.setItem("user", JSON.stringify(userData));
+
+            navigate("/");
+            toast.success("Login Successful!");
+        } catch (decodeError) {
+            console.error("Failed to decode JWT:", decodeError);
+        }
+
+    } catch (e) {
+        console.error("Login error:", e);
+        toast.error("Login failed! Please check your credentials.");
     }
-    
-  } catch (e) {
-    console.error("Login error:", e);
-  }
 };
+
 
 
     const registerUser = async (
