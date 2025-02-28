@@ -1,0 +1,27 @@
+
+.login-section {
+    background-color: rgb(145, 188, 193);
+    min-height: 80vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.login-wrapper {
+    background-color: rgb(145, 188, 193);
+    padding: 20px;
+    border-radius: 10px;
+}
+
+.login-container {
+    background-color: rgb(90, 148, 154);
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    color: white;
+}
+
+.sign-up-link {
+    font-weight: bold;
+    text-decoration: underline;
+}
