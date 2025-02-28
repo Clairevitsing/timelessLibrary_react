@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import * as Yup from "yup";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { Link } from 'react-router-dom';
@@ -20,6 +20,8 @@ const validationSchema = Yup.object().shape({
 
 const LoginPage: React.FC<Props> = () => {
     const { loginUser } = useAuth();
+    const [isSubmitting, setIsSubmitting] = useState(false);
+    
     const {
         register,
         handleSubmit,
@@ -28,8 +30,15 @@ const LoginPage: React.FC<Props> = () => {
         resolver: yupResolver(validationSchema)
     });
 
-    const handleLogin = (form: LoginFormsInputs) => {
-        loginUser(form.email, form.password); 
+    const handleLogin = async (form: LoginFormsInputs) => {
+        try {
+            setIsSubmitting(true);
+            await loginUser(form.email, form.password);
+        } catch (error) {
+            console.error("Login error:", error);
+        } finally {
+            setIsSubmitting(false);
+        }
     };
 
     return (
@@ -48,6 +57,7 @@ const LoginPage: React.FC<Props> = () => {
                                 className={`form-control ${errors.email ? 'is-invalid' : ''}`}
                                 placeholder="Email"
                                 {...register("email")}
+                                disabled={isSubmitting}
                             />
                             {errors.email && <div className="invalid-feedback">{errors.email.message}</div>}
                         </div>
@@ -61,6 +71,7 @@ const LoginPage: React.FC<Props> = () => {
                                 className={`form-control ${errors.password ? 'is-invalid' : ''}`}
                                 placeholder="••••••••"
                                 {...register("password")}
+                                disabled={isSubmitting}
                             />
                             {errors.password && <div className="invalid-feedback">{errors.password.message}</div>}
                         </div>
@@ -82,8 +93,16 @@ const LoginPage: React.FC<Props> = () => {
                         <button
                             type="submit"
                             className="btn btn-primary w-100"
+                            disabled={isSubmitting}
                         >
-                            Sign in
+                            {isSubmitting ? (
+                                <>
+                                    <span className="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                                    Signing in...
+                                </>
+                            ) : (
+                                "Sign in"
+                            )}
                         </button>
                     </form>
                     <p className="text-center mt-3">

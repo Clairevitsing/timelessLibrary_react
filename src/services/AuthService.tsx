@@ -6,7 +6,7 @@ import { UserProfile } from "../models/User";
 const BASE_API_URL = "http://127.0.0.1:8000/api";
 
 
-export const loginAPI = async (email: string, password: string): Promise<{ token: string } | undefined> => {
+export const loginAPI = async (email: string, password: string): Promise<{ token: string } | null> => {
     try {
         console.log("Login request:", { email, password });
 
@@ -22,13 +22,8 @@ export const loginAPI = async (email: string, password: string): Promise<{ token
         console.log("Login success:", response.data);
         return response.data; 
     } catch (error: any) {
-        if (error.response) {
-            console.error("Login failed:", error.response.data);
-        } else {
-            console.error("Login error:", error.message);
-        }
-        //  Gestion explicite des erreurs
-        return undefined; 
+        console.error("Login failed:", error.response?.data || error.message);
+        return null; 
     }
 };
 
