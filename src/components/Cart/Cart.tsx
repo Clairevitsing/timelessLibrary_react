@@ -6,6 +6,7 @@ import { fetchBooksAsync } from '../../slices/booksSlice';
 import { useNavigate } from 'react-router-dom';
 import { jwtDecode } from 'jwt-decode';
 import { UserProfileToken } from '../../models/User';
+import './Cart.css';
 
 // ✅ Fonction améliorée pour récupérer l'utilisateur depuis le token
 const getUserFromToken = () => {
@@ -126,50 +127,42 @@ const Cart: React.FC = () => {
   };
 
   return (
-    <div className="cart">
-      {booksStatus === 'loading' && <div>Loading books...</div>}
-      {booksStatus === 'failed' && <div>Error loading books</div>}
+    <div className="cart-container">
+    {booksStatus === 'loading' && <div>Loading books...</div>}
+    {booksStatus === 'failed' && <div>Error loading books</div>}
 
-      {cartBookData.length > 0 ? (
-        <div className="cart-book">
-          <h3 className="header">Items in Cart</h3>
+    {cartBookData.length > 0 ? (
+      <div className="cart-content">
+        <div className="cart-items">
           {cartBookData.map((book) => (
-            <div key={book.id} className="row mb-3">
+            <div key={book.id} className="cart-item">
               <img className="item-image" src={book.image} alt={book.title} />
-              <div className="item-info ms-3">
+              <div className="item-info">
                 <h4>{book.title}</h4>
-                <p className="text-truncate">{book.ISBN}</p>
-                <button
-                  className="btn btn-danger"
-                  onClick={() => handleRemove(book.id)}
-                >
-                  <i className="bi bi-trash-fill" /> Remove Item
-                </button>
+                <p>{book.ISBN}</p>
+                <button className="remove-btn" onClick={() => handleRemove(book.id)}>❌ Remove</button>
               </div>
             </div>
           ))}
-          <h4 className="mt-3">Total Items: {cartBookData.length}</h4>
+        </div>
 
-          <button
-            className="btn btn-success mt-3"
-            onClick={handleConfirmBorrowing}
-            style={{ width: '100%' }}
-            disabled={loading || cartBookData.length === 0} 
-          >
-            {loading ? 'Processing...' : 'Confirm'}
-          </button>
-          {successMessage && <div className="mt-3">{successMessage}</div>}
-          {error && <div className="mt-3 text-danger">{error}</div>}
-        </div>
-      ) : (
-        <div className="text-center empty-cart">
-          <i className="bi bi-cart3" style={{ fontSize: '2rem' }} />
-          <p>Your cart is empty.</p>
-          <p>You have not added any items to your cart.</p>
-        </div>
-      )}
-    </div>
-  );
+      <div className="cart-summary">
+        <h3>Your Borrowing Summary</h3>
+        <p>Total Items: {cartBookData.length}</p>
+        <button className="validate-btn" onClick={handleConfirmBorrowing}>
+          📚 Confirm Borrowing
+        </button>
+      </div>
+      </div>
+    ) : (
+      <div className="empty-cart">
+        <p>Your cart is empty.</p>
+        <p>You have not added any items yet.</p>
+      </div>
+        )}
+  </div>
+);
+
 };
 
 export default Cart;
