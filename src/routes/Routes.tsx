@@ -12,6 +12,7 @@ import BookCreateForm from "../pages/BookCreateForm/BookCreateForm";
 import BookEditPage from "../pages/BookEditPage/BookEditPage";
 import Cart from "../components/Cart/Cart";
 import LoanDetails from "../components/Loan/LoanDetails";
+import LoanDetailsPage from "../pages/LoanDetailsPage/LoanDetailsPage";
 
 export const router = createBrowserRouter([
     {
@@ -26,6 +27,7 @@ export const router = createBrowserRouter([
             { path: "register", element: <RegisterPage /> },
             { path: "logout", element: <HomePage /> },
             { path: "cart", element: <Cart /> },  
+            { path: "loanDetailsPage", element:<LoanDetailsPage />},
             { path: "loanDetails", element: <LoanDetails /> }, 
             { path: "book/:id", element: <BookDetailPage /> },
             { path: "book/edit", element: <BookEditPage /> },

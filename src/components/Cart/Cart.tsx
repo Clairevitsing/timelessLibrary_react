@@ -112,13 +112,15 @@ const Cart: React.FC = () => {
     const dueDate = new Date();
     dueDate.setDate(loanDate.getDate() + 14);
 
-    navigate('/loanDetails', {
+    navigate('/loanDetailsPage', {
       state: {
         books: cartBookData,
         user: {
           firstname: user.firstname || 'N/A',
           lastname: user.lastname || 'N/A',
           email: user.email || 'N/A',
+          // Important: Pass the user ID for API calls
+          id: user.id 
         },
         loanDate: loanDate.toISOString().split('T')[0],
         dueDate: dueDate.toISOString().split('T')[0],
