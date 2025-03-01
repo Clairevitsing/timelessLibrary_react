@@ -1,4 +1,4 @@
-import React, { useEffect,useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { RootState, AppDispatch } from '../../redux/store';
 import { removeFromCart } from '../../slices/cartSlice';
@@ -7,109 +7,93 @@ import { useNavigate } from 'react-router-dom';
 import { jwtDecode } from 'jwt-decode';
 import { UserProfileToken } from '../../models/User';
 
-
-const token = localStorage.getItem('token');
-if (token) {
-  const decoded = jwtDecode(token);
-  const expDate = (decoded.exp ?? 0) * 1000; 
-  const currentTime = Date.now();
-  
-  if (expDate < currentTime) {
-    console.log("Token expired, redirecting to login...");
-    // Rediriger l'utilisateur vers la page de login
-    window.location.href = "/login";
-  } else {
-    console.log("Token is valid", decoded);
-  }
-}
-
+// ✅ Fonction améliorée pour récupérer l'utilisateur depuis le token
 const getUserFromToken = () => {
-  // Récupérer le profil utilisateur depuis localStorage
-  const userProfile: UserProfileToken | null = JSON.parse(localStorage.getItem('userProfile') || 'null');
-  
-  console.log('UserProfile from localStorage:', userProfile);
+  const storedProfile = localStorage.getItem('userProfile');
 
-  if (userProfile?.token) {
-    try {
-      const decoded = (jwtDecode as any)(userProfile.token);
-      
-      // Vérifier l'expiration du token
-      if (decoded.exp && decoded.exp < Date.now() / 1000) {
-        console.error('Token expired');
-        localStorage.removeItem('userProfile');
-        return null;
-      }
-
-      console.log('Decoded JWT Payload:', decoded);
-      return decoded;
-    } catch (error) {
-      console.error('Failed to decode JWT', error);
-      localStorage.removeItem('userProfile');
-    }
+  if (!storedProfile) {
+    console.warn('No user profile found in localStorage.');
+    return null;
   }
-  
-  return null;
-};
 
+  try {
+    const userProfile: UserProfileToken = JSON.parse(storedProfile);
+    console.log('Retrieved userProfile from localStorage:', userProfile);
+
+    if (!userProfile?.token) {
+      console.error('Token not found in userProfile.');
+      return null;
+    }
+
+    const decoded = jwtDecode(userProfile.token) as any;
+
+    if (!decoded.exp || decoded.exp * 1000 < Date.now()) {
+      console.error('Token is expired.');
+      localStorage.removeItem('userProfile');
+      return null;
+    }
+
+    console.log('Decoded user:', decoded);
+    return decoded;
+  } catch (error) {
+    console.error('Error decoding token:', error);
+    localStorage.removeItem('userProfile');
+    return null;
+  }
+};
 
 const Cart: React.FC = () => {
   const dispatch = useDispatch<AppDispatch>();
   const navigate = useNavigate();
 
-  // Add state for user
+  // ✅ États pour gérer l'authentification
   const [user, setUser] = useState<any>(null);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
 
-  // Récupérer les livres et les IDs du panier depuis Redux
+  // ✅ Récupération des livres et du panier
   const books = useSelector((state: RootState) => state.books.books);
   const cartBookIds = useSelector((state: RootState) => state.cart.cartBookIds);
   const booksStatus = useSelector((state: RootState) => state.books.status);
 
-  // Initialize state for book IDs, loan ID, and other states
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  // ✅ États supplémentaires
   const [bookIds, setBookIds] = useState<number[]>([]); 
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const [loanId, setLoanId] = useState<number>(0); 
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [loading, setLoading] = useState(false);
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [error, setError] = useState<string | null>(null);
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [successMessage, setSuccessMessage] = useState<string>('');
 
-    // Vérification de l'authentification
+  // ✅ Vérification de l'authentification au chargement
   useEffect(() => {
     const userData = getUserFromToken();
-    console.log('User data from token:', userData);
 
     if (userData) {
+      console.log('User is authenticated:', userData);
       setUser(userData);
       setIsAuthenticated(true);
     } else {
-      console.log('No user data found, redirecting to login');
+      console.warn('User is NOT authenticated, redirecting to login.');
       setIsAuthenticated(false);
-      // navigate('/login');
+      navigate('/login');
     }
   }, [navigate]);
 
-  // Charger les livres si nécessaire
+  // ✅ Charger les livres si nécessaire
   useEffect(() => {
     if (booksStatus === 'idle') {
       dispatch(fetchBooksAsync());
     }
   }, [dispatch, booksStatus]);
 
-   // Mettre à jour bookIds à chaque changement dans cartBookIds
+  // ✅ Mettre à jour les IDs des livres dans le panier
   useEffect(() => {
-    setBookIds(cartBookIds); 
+    setBookIds(cartBookIds);
   }, [cartBookIds]);
 
-
-if (!isAuthenticated) {
+  // ✅ Redirection si l'utilisateur n'est pas authentifié
+  if (!isAuthenticated) {
     return <div>Redirecting to login...</div>;
   }
 
-  // Filtrer les livres présents dans le panier
+  // ✅ Filtrer les livres présents dans le panier
   const cartBookData = books.filter((book) => cartBookIds.includes(book.id));
 
   const handleRemove = (id: number) => {
@@ -127,7 +111,6 @@ if (!isAuthenticated) {
     const dueDate = new Date();
     dueDate.setDate(loanDate.getDate() + 14);
 
-    // Ensure user object has the required properties
     navigate('/loanDetails', {
       state: {
         books: cartBookData,
@@ -141,7 +124,6 @@ if (!isAuthenticated) {
       },
     });
   };
-
 
   return (
     <div className="cart">
@@ -167,7 +149,7 @@ if (!isAuthenticated) {
             </div>
           ))}
           <h4 className="mt-3">Total Items: {cartBookData.length}</h4>
-          {/* Submit Button */}
+
           <button
             className="btn btn-success mt-3"
             onClick={handleConfirmBorrowing}
@@ -176,7 +158,7 @@ if (!isAuthenticated) {
           >
             {loading ? 'Processing...' : 'Confirm'}
           </button>
-            {successMessage && <div className="mt-3">{successMessage}</div>}
+          {successMessage && <div className="mt-3">{successMessage}</div>}
           {error && <div className="mt-3 text-danger">{error}</div>}
         </div>
       ) : (
@@ -191,6 +173,7 @@ if (!isAuthenticated) {
 };
 
 export default Cart;
+
 
 
 

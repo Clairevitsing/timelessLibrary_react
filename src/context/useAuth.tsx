@@ -37,56 +37,67 @@ export const UserProvider: React.FC<Props> = ({ children }) => {
     }, []);
 
 
-    const loginUser = async (email: string, password: string):Promise<void>=> {
-        try {
-            const res = await loginAPI(email, password);
-            if (!res) {
-                toast.error("Invalid credentials! Please try again.");
-                return;
-            }
+const loginUser = async (email: string, password: string): Promise<void> => {
+    try {
+        const res = await loginAPI(email, password);
+        if (!res) {
+            toast.error("Invalid credentials! Please try again.");
+            return;
+        }
 
-            const { token } = res;
+        const { token, user } = res;
+        
+        try {
+            const decodedToken = jwtDecode<UserDecodedToken>(token);
+            console.log("Decoded Token:", decodedToken);
+
+            // Si l'API renvoie un utilisateur, utilisez-le, sinon créez-en un à partir du token
+            const userData: UserProfile = user || {
+                firstName: "",  
+                lastName: "",  
+                userName: decodedToken.userName ?? "",
+                phoneNumber: "", 
+                email: decodedToken.email ?? "",
+                password: "",   
+                roles: decodedToken.roles ?? [],
+                subStartDate: "",
+                subEndDate: ""
+            };
+
+            // Créez un objet combiné comme attendu par getUserFromToken()
+            const userProfileData = {
+                ...userData,
+                token: token
+            };
+
+            // Stockez dans localStorage sous la clé 'userProfile'
+            localStorage.setItem("userProfile", JSON.stringify(userProfileData));
+            
+            // Vous pouvez aussi conserver les clés individuelles si nécessaire
             localStorage.setItem("token", token);
+            localStorage.setItem("user", JSON.stringify(userData));
+
+            setUser(userData);
             setToken(token);
 
-            try {
-                const decodedToken = jwtDecode<UserDecodedToken>(token);
-                console.log("Decoded Token:", decodedToken);
-
-            const userData: UserProfile = {
-                                                firstName: "",  
-                                                lastName: "",  
-                                                userName: decodedToken.userName ?? "",
-                                                phoneNumber: "", 
-                                                email: decodedToken.email ?? "",
-                                                password: "",   
-                                                roles: decodedToken.roles ?? [],
-                                                subStartDate: "",
-                                                subEndDate: ""
-                                            };
-
-                setUser(userData);
-                localStorage.setItem("user", JSON.stringify(userData));
-
-                toast.success("Login Successful! Redirecting...");
-                
-                navigate("/", { replace: true });
-                
-            } catch (decodeError) {
-                console.error("Failed to decode JWT:", decodeError);
-                localStorage.removeItem("token");
-                setToken(null);
-                toast.error("Session error. Please log in again.");
-                throw new Error("JWT decode failed");
-            }
-
-        } catch (e) {
-            console.error("Login error:", e);
-            toast.error("Login failed! Please check your credentials.");
+            toast.success("Login Successful! Redirecting...");
+            navigate("/", { replace: true });
+            
+        } catch (decodeError) {
+            console.error("Failed to decode JWT:", decodeError);
+            localStorage.removeItem("token");
+            localStorage.removeItem("user");
+            localStorage.removeItem("userProfile");
+            setToken(null);
+            toast.error("Session error. Please log in again.");
+            throw new Error("JWT decode failed");
         }
-    };
 
-
+    } catch (e) {
+        console.error("Login error:", e);
+        toast.error("Login failed! Please check your credentials.");
+    }
+};
 
     const registerUser = async (
         firstName: string,

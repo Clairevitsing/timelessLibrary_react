@@ -6,7 +6,7 @@ import { UserProfile } from "../models/User";
 const BASE_API_URL = "http://127.0.0.1:8000/api";
 
 
-export const loginAPI = async (email: string, password: string): Promise<{ token: string } | null> => {
+export const loginAPI = async (email: string, password: string): Promise<{ token: string, user?: UserProfile  | null } | null> => {
     try {
         console.log("Login request:", { email, password });
 
@@ -19,14 +19,25 @@ export const loginAPI = async (email: string, password: string): Promise<{ token
             throw new Error("No token received from API");
         }
 
-        console.log("Login success:", response.data);
-        return response.data; 
+        // Configuration du token pour les futures requêtes
+        axios.defaults.headers.common['Authorization'] = `Bearer ${response.data.token}`;
+        
+        // Obtention des données utilisateur (si vous avez un endpoint /me)
+        let userData = null;
+        try {
+            const userResponse = await axios.get<UserProfile>(`${BASE_API_URL}/me`);
+            userData = userResponse.data;
+        } catch (userError) {
+            console.warn("Could not fetch user profile", userError);
+        }
+
+        console.log("Login success with user data:", { token: response.data.token, user: userData });
+        return { ...response.data, user: userData }; 
     } catch (error: any) {
         console.error("Login failed:", error.response?.data || error.message);
         return null; 
     }
 };
-
 
 
 export const registerAPI = async (
