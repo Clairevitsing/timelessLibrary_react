@@ -5,6 +5,7 @@ import { clearCart } from '../../slices/cartSlice';
 import LoanService from '../../services/LoanService';
 import './LoanDetailsPage.css';
 import { LoanDetailsState } from '../../models/Loan';
+import jsPDF from 'jspdf';
 
 const LoanDetailsPage: React.FC = () => {
   const location = useLocation();
@@ -75,7 +76,99 @@ const LoanDetailsPage: React.FC = () => {
     }
   };
 
+  const handleDownload = () => {
+  if (!books || !user) {
+    setErrorMessage("No loan details to download");
+    return;
+  }
+
+  // Créer un nouveau document PDF
+  const doc = new jsPDF();
+  
+  // Configuration de style
+  doc.setFontSize(16);
+  doc.setFont("helvetica", "bold");
+  doc.text("LOAN DETAILS", 105, 20, { align: "center" });
+  
+  // Ligne de séparation
+  doc.setDrawColor(0);
+  doc.setLineWidth(0.5);
+  doc.line(20, 25, 190, 25);
+  
+  // Informations de l'emprunteur
+  doc.setFontSize(14);
+  doc.setFont("helvetica", "bold");
+  doc.text("Borrower Information", 20, 35);
+  
+  doc.setFontSize(12);
+  doc.setFont("helvetica", "normal");
+  
+  // Données d'emprunteur
+  const borrowerInfo = [
+    `Name: ${user.firstName || ''} ${user.lastName || ''}`,
+    `Username: ${user.userName || 'N/A'}`,
+    `Email: ${user.email || 'N/A'}`,
+    `Loan Date: ${loanDate}`,
+    `Due Date: ${dueDate}`,
+    `Return Date: Not returned yet`,
+    `Total Books: ${books.length || 0}`
+  ];
+  
+  let yPosition = 45;
+  borrowerInfo.forEach(info => {
+    doc.text(info, 25, yPosition);
+    yPosition += 8;
+  });
+  
+  // Ligne de séparation
+  doc.line(20, yPosition, 190, yPosition);
+  yPosition += 10;
+  
+  // Livres empruntés
+  doc.setFontSize(14);
+  doc.setFont("helvetica", "bold");
+  doc.text("Books Being Borrowed", 20, yPosition);
+  yPosition += 10;
+  
+  doc.setFontSize(12);
+  doc.setFont("helvetica", "normal");
+  
+  // Liste des livres
+  books.forEach((book, index) => {
+    // Vérifier si on a besoin d'une nouvelle page
+    if (yPosition > 270) {
+      doc.addPage();
+      yPosition = 20;
+    }
+    
+    doc.setFont("helvetica", "bold");
+    doc.text(`${index + 1}. ${book.title}`, 25, yPosition);
+    yPosition += 8;
+    
+    doc.setFont("helvetica", "normal");
+    doc.text(`ISBN: ${book.ISBN}`, 30, yPosition);
+    yPosition += 12;
+  });
+  
+  // Ajout du numéro de prêt s'il existe
+  if (loanId) {
+    yPosition += 5;
+    doc.setFont("helvetica", "bold");
+    doc.text(`Loan ID: ${loanId}`, 20, yPosition);
+  }
+  
+  // Pied de page avec date de génération
+  const today = new Date().toLocaleDateString();
+  doc.setFontSize(10);
+  doc.setFont("helvetica", "italic");
+  doc.text(`Generated on: ${today}`, 20, 285);
+  
+  // Télécharger le PDF
+  doc.save(`loan-details-${new Date().toISOString().split('T')[0]}.pdf`);
+};
+  
   return (
+    <div className="loan-details-page">
     <div className="loan-details-container">
       <h2>Loan Details</h2>
 
@@ -148,6 +241,13 @@ const LoanDetailsPage: React.FC = () => {
           >
             {isSubmitting ? 'Processing...' : 'Confirm Loan'}
           </button>
+          <button
+            className="download-button"
+            onClick={handleDownload}
+            disabled={!books || books.length === 0}
+            >
+            Download
+          </button>
         </div>
       ) : (
         <div className="action-buttons">
@@ -159,7 +259,8 @@ const LoanDetailsPage: React.FC = () => {
           </button>
         </div>
       )}
-    </div>
+      </div>
+      </div>
   );
 };
 

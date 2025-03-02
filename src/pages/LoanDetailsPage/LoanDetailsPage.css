@@ -1,16 +1,26 @@
+
+.loan-details-page {
+    background-color: rgb(145, 188, 193);
+    min-height: 100vh;
+    color: #ffffff;
+}
+
 .loan-details-container {
+    background-color: rgb(90, 148, 154);
     max-width: 800px;
-    margin: 0 auto;
+    position: relative;
+    top: 20px;
+    border: 1px solid #ddd;
+    border-radius: 10px;
     padding: 20px;
-    background-color: #fff;
-    border-radius: 8px;
+    margin-left: auto;
+    margin-right: auto;
     box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
 }
 
 h2 {
     text-align: center;
     margin-bottom: 20px;
-    color: #333;
 }
 
 .error-message {
@@ -40,7 +50,6 @@ h3 {
     border-bottom: 1px solid #eee;
     padding-bottom: 10px;
     margin-bottom: 15px;
-    color: #555;
 }
 
 .info-grid {
@@ -51,7 +60,7 @@ h3 {
 
 .info-label {
     font-weight: bold;
-    color: #666;
+    color: #ffebee;
 }
 
 .book-list {
@@ -92,7 +101,6 @@ h3 {
 .book-details p {
     margin: 0;
     font-size: 0.85rem;
-    color: #666;
 }
 
 .action-buttons {
@@ -111,12 +119,12 @@ button {
 }
 
 .back-button {
-    background-color: #e0e0e0;
-    color: #333;
+    background-color: #ef9b9b;
+    color: #f3f2f2;
 }
 
 .back-button:hover {
-    background-color: #d0d0d0;
+    background-color:#ec1a1a;
 }
 
 .confirm-button {
@@ -142,4 +150,33 @@ button {
 
 .home-button:hover {
     background-color: #1976d2;
+}
+
+.download-button {
+    background-color: #4b6584;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    padding: 10px 20px;
+    font-size: 16px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.download-button:hover {
+    background-color: #3c526d;
+}
+
+.download-button:disabled {
+    background-color: #a5b1c2;
+    cursor: not-allowed;
+}
+
+
+.download-button::before {
+    content: "📄";
+    margin-right: 8px;
 }
