@@ -19,7 +19,7 @@ export type UserDecodedToken = {
 }
 
 export type UserProfile = {
-    id?: number, 
+    userId?: number, 
     firstName: string,
     lastName: string,
     userName: string,

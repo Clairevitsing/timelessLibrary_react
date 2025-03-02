@@ -25,7 +25,7 @@ const NavbarComponent: React.FC = () => {
         const token = localStorage.getItem("token");
         if (token) {
           const decodedToken: any = jwtDecode(token);
-          const extractedUsername = decodedToken.userName || decodedToken.username || decodedToken.name || decodedToken.sub || decodedToken.email;
+          const extractedUsername = decodedToken.userId || decodedToken.userName || decodedToken.username || decodedToken.name || decodedToken.sub || decodedToken.email;
           setUsername(extractedUsername ?? "Utilisateur");
         }
       } catch (error) {

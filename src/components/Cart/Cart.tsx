@@ -37,10 +37,14 @@ const getUserFromToken = () => {
     console.log('Decoded user:', decoded);
     
     // Return the decoded user with necessary properties
-    return {
-      ...decoded,
-      token: userProfile.token  // Include the token in the returned user
-      // Don't try to access or assign id if it doesn't exist in your interfaces
+     return {
+      id: decoded.userId,  
+      firstName: decoded.firstName,
+      lastName: decoded.lastName,
+      userName: decoded.userName,
+      email: decoded.email,
+      roles: decoded.roles,
+      token: userProfile.token,
     };
   } catch (error) {
     console.error('Error decoding token:', error);
@@ -112,6 +116,8 @@ const handleConfirmBorrowing = () => {
     navigate('/login');
     return;
   }
+
+  console.log("User before navigation:", user);
 
   const loanDate = new Date();
   const dueDate = new Date();
