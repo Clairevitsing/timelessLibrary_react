@@ -53,6 +53,7 @@ const loginUser = async (email: string, password: string): Promise<void> => {
 
             // Si l'API renvoie un utilisateur, utilisez-le, sinon créez-en un à partir du token
             const userData: UserProfile = user || {
+                id: decodedToken.id ?? undefined,
                 firstName: decodedToken.firstName ?? "",  
                 lastName: decodedToken.lastName ?? "",
                 userName: decodedToken.userName ?? "",
