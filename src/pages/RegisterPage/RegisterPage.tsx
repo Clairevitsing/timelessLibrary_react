@@ -4,6 +4,7 @@ import { yupResolver } from "@hookform/resolvers/yup";
 import * as Yup from "yup";
 import { useAuth } from "../../context/useAuth";
 import styles from "./RegisterPage.module.css"; 
+import { useNavigate } from "react-router-dom";
 
 type RegisterFormsInputs = {
   firstName: string;
@@ -32,6 +33,7 @@ const validationSchema = Yup.object().shape({
 const RegisterForm = () => {
   const { registerUser } = useAuth();
   const [registrationError, setRegistrationError] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
 
   const { register, handleSubmit, formState: { errors } } = useForm<RegisterFormsInputs>({
     resolver: yupResolver(validationSchema),
@@ -42,21 +44,38 @@ const RegisterForm = () => {
     },
   });
 
-  const onSubmit = (data: RegisterFormsInputs) => {
+  const navigate = useNavigate();
+  
+  const onSubmit = async (data: RegisterFormsInputs) => {
     setRegistrationError(null);
-    registerUser(
-      data.firstName,
-      data.lastName,
-      data.userName,
-      data.phoneNumber,
-      data.email,
-      data.password,
-      data.roles,
-      data.subStartDate,
-      data.subEndDate
-    ).catch((error) => {
-      setRegistrationError(error.response?.data?.message || 'Registration failed. Please try again.');
-    });
+    setIsLoading(true);
+    
+    try {
+      // Assuming registerUser returns a Promise
+      await registerUser(
+        data.firstName,
+        data.lastName,
+        data.userName,
+        data.phoneNumber,
+        data.email,
+        data.password,
+        data.roles,
+        data.subStartDate,
+        data.subEndDate
+      );
+      
+      // Only redirect if registration is successful
+      navigate("/");
+    } catch(error) {
+      if (error instanceof Error && "response" in error) {
+        const apiError = error as { response?: { data?: { message?: string } } };
+        setRegistrationError(apiError.response?.data?.message || 'Registration failed. Please try again.');
+      } else {
+        setRegistrationError('Registration failed. Please try again.');
+      }
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -73,43 +92,43 @@ const RegisterForm = () => {
         <form onSubmit={handleSubmit(onSubmit)}>
           <div className={styles.formGroup}>
             <label htmlFor="firstName">First Name</label>
-            <input type="text" className="form-control" id="firstName" {...register("firstName")} />
+            <input type="text" className="form-control" id="firstName" {...register("firstName")} disabled={isLoading} />
             {errors.firstName && <p className={styles.textDanger}>{errors.firstName.message}</p>}
           </div>
 
           <div className={styles.formGroup}>
             <label htmlFor="lastName">Last Name</label>
-            <input type="text" className="form-control" id="lastName" {...register("lastName")} />
+            <input type="text" className="form-control" id="lastName" {...register("lastName")} disabled={isLoading} />
             {errors.lastName && <p className={styles.textDanger}>{errors.lastName.message}</p>}
           </div>
 
           <div className={styles.formGroup}>
             <label htmlFor="userName">Username</label>
-            <input type="text" className="form-control" id="userName" {...register("userName")} />
+            <input type="text" className="form-control" id="userName" {...register("userName")} disabled={isLoading} />
             {errors.userName && <p className={styles.textDanger}>{errors.userName.message}</p>}
           </div>
 
           <div className={styles.formGroup}>
             <label htmlFor="phoneNumber">Phone Number</label>
-            <input type="tel" className="form-control" id="phoneNumber" {...register("phoneNumber")} />
+            <input type="tel" className="form-control" id="phoneNumber" {...register("phoneNumber")} disabled={isLoading} />
             {errors.phoneNumber && <p className={styles.textDanger}>{errors.phoneNumber.message}</p>}
           </div>
 
           <div className={styles.formGroup}>
             <label htmlFor="email">Email Address</label>
-            <input type="email" className="form-control" id="email" {...register("email")} />
+            <input type="email" className="form-control" id="email" {...register("email")} disabled={isLoading} />
             {errors.email && <p className={styles.textDanger}>{errors.email.message}</p>}
           </div>
 
           <div className={styles.formGroup}>
             <label htmlFor="password">Password</label>
-            <input type="password" className="form-control" id="password" {...register("password")} />
+            <input type="password" className="form-control" id="password" {...register("password")} disabled={isLoading} />
             {errors.password && <p className={styles.textDanger}>{errors.password.message}</p>}
           </div>
 
           <div className={styles.formGroup}>
             <label htmlFor="roles">Roles</label>
-            <select multiple className="form-select" id="roles" {...register("roles")}>
+            <select multiple className="form-select" id="roles" {...register("roles")} disabled={isLoading}>
               <option value="ROLE_USER">User</option>
               <option value="ROLE_ADMIN">Admin</option>
             </select>
@@ -118,18 +137,20 @@ const RegisterForm = () => {
 
           <div className={styles.formGroup}>
             <label htmlFor="subStartDate">Subscription Start Date</label>
-            <input type="datetime-local" className="form-control" id="subStartDate" {...register("subStartDate")} />
+            <input type="datetime-local" className="form-control" id="subStartDate" {...register("subStartDate")} disabled={isLoading} />
             {errors.subStartDate && <p className={styles.textDanger}>{errors.subStartDate.message}</p>}
           </div>
 
           <div className={styles.formGroup}>
             <label htmlFor="subEndDate">Subscription End Date</label>
-            <input type="datetime-local" className="form-control" id="subEndDate" {...register("subEndDate")} />
+            <input type="datetime-local" className="form-control" id="subEndDate" {...register("subEndDate")} disabled={isLoading} />
             {errors.subEndDate && <p className={styles.textDanger}>{errors.subEndDate.message}</p>}
           </div>
 
           <div className={styles.buttonWrapper}>
-            <button type="submit" className="btn btn-primary">Register</button>
+            <button type="submit" className="btn btn-primary" disabled={isLoading}>
+              {isLoading ? 'Registering...' : 'Register'}
+            </button>
           </div>
         </form>
       </div>
