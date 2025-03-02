@@ -1,3 +1,6 @@
+import { Book } from './Book';
+import { UserDecodedToken } from './User';
+
 export interface CreateLoanRequest {
   userId: number;
   loanDate: string;
@@ -23,4 +26,11 @@ export interface Loan {
     ISBN: string;
     image: string;
   }[];
+}
+
+export interface LoanDetailsState {
+  books: Book[];
+  user: UserDecodedToken;
+  loanDate: string;
+  dueDate: string;
 }

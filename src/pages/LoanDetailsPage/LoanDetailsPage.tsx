@@ -4,27 +4,9 @@ import { useDispatch } from 'react-redux';
 import { clearCart } from '../../slices/cartSlice';
 import LoanService from '../../services/LoanService';
 import './LoanDetailsPage.css';
+import { LoanDetailsState } from '../../models/Loan';
 
-interface Book {
-  id: number;
-  title: string;
-  ISBN: string;
-  image: string;
-}
 
-interface User {
-  firstname: string;
-  lastname: string;
-  email: string;
-  id: number;
-}
-
-interface LoanDetailsState {
-  books: Book[];
-  user: User;
-  loanDate: string;
-  dueDate: string;
-}
 
 const LoanDetailsPage: React.FC = () => {
   const location = useLocation();
@@ -52,6 +34,12 @@ const LoanDetailsPage: React.FC = () => {
   const handleConfirmLoan = async () => {
     if (!user || !books || books.length === 0) {
       setErrorMessage("Missing user or book information");
+      return;
+    }
+    const userId = user.id || user.userName;
+
+    if (!user.id) {
+      setErrorMessage("Missing user ID");
       return;
     }
 
@@ -109,10 +97,13 @@ const LoanDetailsPage: React.FC = () => {
         <h3>Borrower Information</h3>
         <div className="info-grid">
           <div className="info-label">Name:</div>
-          <div className="info-value">{user.firstname} {user.lastname}</div>
+          <div className="info-value">{user?.firstName || ''} {user?.lastName || ''}</div>
+          
+          <div className="info-label">Username:</div>
+          <div className="info-value">{user?.userName || 'N/A'}</div>
           
           <div className="info-label">Email:</div>
-          <div className="info-value">{user.email}</div>
+          <div className="info-value">{user?.email || 'N/A'}</div>
           
           <div className="info-label">Loan Date:</div>
           <div className="info-value">{loanDate}</div>
@@ -122,13 +113,16 @@ const LoanDetailsPage: React.FC = () => {
           
           <div className="info-label">Return Date:</div>
           <div className="info-value">Not returned yet</div>
+
+          <div className="info-label">Total Books:</div>
+         <div className="info-value">{books?.length || 0}</div>
         </div>
       </div>
       
       <div className="books-section">
         <h3>Books Being Borrowed</h3>
         <div className="book-list">
-          {books.map((book) => (
+          {books?.map((book) => (
             <div key={book.id} className="book-item">
               <img src={book.image} alt={book.title} className="book-thumbnail" />
               <div className="book-details">

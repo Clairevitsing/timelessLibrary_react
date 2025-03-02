@@ -1,15 +1,21 @@
 export type UserProfileToken = {
-    userName: string;
-    email: string;
-    password: string;
-    token: string;
+  userName: string;
+  email: string;
+  password: string;
+  token: string;
+  id?: number; 
 }
 
 export type UserDecodedToken = {
+  firstName?: string,
+  lastName?: string,
   userName?: string;
   email?: string;
   roles?: string[];
   token: string;
+  id?: number;
+  iat?: number;
+  exp?: number;
 }
 
 export type UserProfile = {
@@ -23,3 +29,4 @@ export type UserProfile = {
     subStartDate: string,
     subEndDate: string
 }
+

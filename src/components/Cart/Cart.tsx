@@ -35,14 +35,19 @@ const getUserFromToken = () => {
     }
 
     console.log('Decoded user:', decoded);
-    return decoded;
+    
+    // Return the decoded user with necessary properties
+    return {
+      ...decoded,
+      token: userProfile.token  // Include the token in the returned user
+      // Don't try to access or assign id if it doesn't exist in your interfaces
+    };
   } catch (error) {
     console.error('Error decoding token:', error);
     localStorage.removeItem('userProfile');
     return null;
   }
 };
-
 const Cart: React.FC = () => {
   const dispatch = useDispatch<AppDispatch>();
   const navigate = useNavigate();
@@ -101,32 +106,27 @@ const Cart: React.FC = () => {
     dispatch(removeFromCart(id));
   };
 
-  const handleConfirmBorrowing = () => {
-    if (!user) {
-      console.error('User not found');
-      navigate('/login');
-      return;
-    }
+const handleConfirmBorrowing = () => {
+  if (!user) {
+    console.error('User not found');
+    navigate('/login');
+    return;
+  }
 
-    const loanDate = new Date();
-    const dueDate = new Date();
-    dueDate.setDate(loanDate.getDate() + 14);
+  const loanDate = new Date();
+  const dueDate = new Date();
+  dueDate.setDate(loanDate.getDate() + 14);
 
-    navigate('/loanDetailsPage', {
-      state: {
-        books: cartBookData,
-        user: {
-          firstname: user.firstname || 'N/A',
-          lastname: user.lastname || 'N/A',
-          email: user.email || 'N/A',
-          // Important: Pass the user ID for API calls
-          id: user.id 
-        },
-        loanDate: loanDate.toISOString().split('T')[0],
-        dueDate: dueDate.toISOString().split('T')[0],
-      },
-    });
-  };
+  // Pass the decoded user object directly
+  navigate('/loanDetailsPage', {
+    state: {
+      books: cartBookData,
+      user: user,
+      loanDate: loanDate.toISOString().split('T')[0],
+      dueDate: dueDate.toISOString().split('T')[0],
+    },
+  });
+};
 
   return (
     <div className="cart-container">
