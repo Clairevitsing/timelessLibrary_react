@@ -22,3 +22,18 @@ export const fetchCategories = async (): Promise<Category[]> => {
         throw new Error('Failed to fetch categories');
     }
 };
+
+export const fetchCategoryById = async (categoryId: number): Promise<Category> => {
+  try {
+    const response = await axios.get(`${BASE_API_URL}/${categoryId}`);
+    
+    if (!response.data) {
+      throw new Error('Aucune donnée de catégorie trouvée');
+    }
+    
+    return response.data;
+  } catch (error) {
+    console.error(`Erreur lors de la récupération de la catégorie ${categoryId}:`, error);
+    throw new Error('Échec de la récupération de la catégorie');
+  }
+};

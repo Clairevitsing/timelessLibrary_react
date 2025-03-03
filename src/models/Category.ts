@@ -1,8 +1,6 @@
 
-export interface Category {
-    id: number;
-    name: string;
-    // Optional description
-    description?: string;
-    books?: any[];
-}
+export type Category = {
+  id: number;
+  name: string;
+  description: string | undefined; 
+};
