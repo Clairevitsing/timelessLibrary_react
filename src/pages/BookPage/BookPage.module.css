@@ -1,0 +1,99 @@
+/* Couleur de fond pour le corps de la page */
+:global(body) {
+    background-color: rgb(145, 188, 193);
+    margin: 0;
+    padding: 0;
+}
+.card-body {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    /* Centrer horizontalement */
+    justify-content: center;
+    /* Centrer verticalement */
+    text-align: center;
+    flex-grow: 1;
+    /* Permet au contenu de s'étirer */
+}
+
+
+/* Style pour le conteneur de recherche */
+.searchContainer {
+    background-color: rgb(90, 148, 154);
+    padding: 20px;
+    border-radius: 8px;
+    margin-bottom: 20px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* Style pour le conteneur des livres */
+.booksContainer {
+    background-color: rgb(90, 148, 154);
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* Styles additionnels pour améliorer l'apparence globale */
+.booksContainer h2 {
+    color: white;
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+/* Style pour les cartes de livres - en utilisant :global pour cibler les classes Bootstrap */
+.booksContainer :global(.card) {
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    height: 100%;
+}
+
+.booksContainer :global(.card:hover) {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+}
+
+/* Style pour le formulaire de recherche */
+.searchContainer form {
+    width: 100%;
+    max-width: 500px;
+}
+
+/* Style pour le bouton d'ajout de livre */
+.searchContainer :global(.btn-primary) {
+    background-color: #0056b3;
+    border-color: #004085;
+}
+
+.searchContainer :global(.btn-primary:hover) {
+    background-color: #003d7e;
+    border-color: #002752;
+}
+
+.searchButton {
+    background-color: #007bff !important;
+    /* Bleu plus vif */
+    color: white !important;
+    border: none !important;
+    padding: 8px 15px;
+    border-radius: 5px;
+    transition: background 0.3s ease;
+}
+
+.searchButton:hover {
+    background-color: #0056b3 !important;
+    /* Bleu plus foncé au survol */
+}
+.btnColor {
+    background-color: rgb(90, 148, 154) !important;
+    color: white !important;
+    border: none !important;
+    padding: 10px 20px;
+    border-radius: 5px;
+    margin-top: auto;
+    transition: background 0.3s ease;
+    text-align: center;
+}
+
+.btnColor:hover {
+    background-color: rgb(70, 120, 125) !important;
+}

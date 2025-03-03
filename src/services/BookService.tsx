@@ -56,23 +56,6 @@ export const fetchNewBooks = async (): Promise<Book[]> => {
     }
 };
 
-
-// export const fetchBookDetails = async (bookId: number): Promise<Book> => {
-//     try {
-//         const response = await axios.get(`${BASE_API_URL}/${bookId}`);
-//         const bookData = response.data;
-//         return {
-//             ...bookData,
-//             publishedYear: new Date(bookData.publishedYear),
-//             authors: bookData.authors,
-//             category: bookData.category
-//         };
-//     } catch (error) {
-//         console.error('Error fetching book details:', error);
-//         throw new Error('Failed to fetch book details');
-//     }
-// };
-
 export const fetchBookDetails = async (bookId: number): Promise<Book> => {
     try {
         console.log(`Attempting to fetch book details for ID: ${bookId}`);
@@ -153,7 +136,7 @@ export const fetchBookDetailsForEdit = async (bookId: number): Promise<Book> => 
 export const updateBookAvailability = async (id: number, available: boolean) => {
   try {
     const response = await axios.patch(
-      `http://127.0.0.1:8000/api/books/${id}/availability`,
+      `${BASE_API_URL}/${id}/availability`,
       { available }, // Envoi des données au backend
       { headers: { 'Content-Type': 'application/json' } } // En-têtes pour JSON
     );
@@ -174,9 +157,6 @@ export const updateBookAvailability = async (id: number, available: boolean) => 
   }
 };
 
-
-
-
 export const createNewBook = async (bookData: NewBookData): Promise<Book> => {
     try {
         const response = await axios.post(`${BASE_API_URL}/new`, bookData);
@@ -187,7 +167,7 @@ export const createNewBook = async (bookData: NewBookData): Promise<Book> => {
         console.error('Failed to create book:', error);
         throw new Error('Failed to create new book');
     }
-}
+};
 
 export const fetchRandomBookFromList = async (): Promise<Book> => {
     try {
@@ -204,4 +184,48 @@ export const fetchRandomBookFromList = async (): Promise<Book> => {
         console.error("Error fetching books:", error);
         throw new Error("Failed to fetch books");
     }
+};
+
+export const deleteBook = async (bookId: number): Promise<boolean> => {
+  try {
+    console.log(`Attempting to delete book with ID: ${bookId}`);
+    console.log(`Full URL: ${BASE_API_URL}/${bookId}`);
+    
+    const response = await axios.delete(`${BASE_API_URL}/${bookId}`, {
+      timeout: 10000,
+      headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json'
+      }
+    });
+    
+    console.log('Delete response status:', response.status);
+    console.log('Delete response data:', response.data);
+    
+    return true;
+  } catch (error: any) {
+    console.error('Error deleting book:', {
+      message: error.message,
+      code: error.code,
+      response: error.response?.data,
+      status: error.response?.status
+    });
+    
+    // Gestion spécifique des erreurs
+    if (axios.isAxiosError(error)) {
+      if (error.response) {
+        if (error.response.status === 404) {
+          throw new Error(`Book with ID ${bookId} not found`);
+        } else if (error.response.status === 403) {
+          throw new Error('You do not have permission to delete this book');
+        } else if (error.response.status === 500) {
+          throw new Error('Server error. Please try again later.');
+        }
+      } else if (error.request) {
+        throw new Error('No response received from server. Check your network connection.');
+      }
+    }
+    
+    throw new Error('Failed to delete book');
+  }
 };

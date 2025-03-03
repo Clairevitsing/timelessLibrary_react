@@ -1,3 +1,41 @@
-.book-details-container {
-margin-top: 30px;
+/* Style principal pour la page de détail du livre */
+.book-detail-container {
+    background-color: rgb(145, 188, 193);
+    min-height: 80vh;
+    padding: 20px 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+/* Style pour la carte du livre */
+.book-card {
+    width: 30rem;
+    height: auto;
+}
+
+/* Style pour le conteneur d'image */
+.book-image-container {
+    height: 200px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Style pour l'image du livre */
+.book-image {
+    max-height: 100%;
+    object-fit: contain;
+}
+
+/* Style pour les boutons utilisateur */
+.user-actions {
+    text-align: center;
+}
+
+/* Style pour les boutons admin */
+.admin-actions {
+    border-top: 1px solid rgba(0, 0, 0, .125);
+    display: flex;
+    justify-content: space-between;
 }
