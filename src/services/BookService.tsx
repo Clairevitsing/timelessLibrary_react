@@ -1,6 +1,7 @@
 import axios from 'axios';
-import { Book, NewBookData } from '../models/Book';
 import { Author } from '../models/Author';
+import { Book, NewBookData, formatDateForApi } from '../models/Book';
+
 
 const BASE_API_URL = "http://127.0.0.1:8000/api/books";
 
@@ -122,25 +123,28 @@ export const fetchBookDetails = async (bookId: number): Promise<Book> => {
 };
 
 
-export const fetchBookDetailsForEdit = async (bookId: number): Promise<Book> => {
-  try {
-    const response = await axios.get(`${BASE_API_URL}/${bookId}/edit`);
-    const bookData: Book = response.data;
-    return bookData;
-  } catch (error) {
-    console.error('Error fetching book details for edit:', error);
-    throw new Error('Failed to fetch book details for editing');
-  }
-};
+// export const fetchBookDetailsForEdit = async (bookId: number): Promise<Book> => {
+//   try {
+//     const response = await axios.get(`${BASE_API_URL}/${bookId}/edit`);
+//     const bookData: Book = response.data;
+//     return bookData;
+//   } catch (error) {
+//     console.error('Error fetching book details for edit:', error);
+//     throw new Error('Failed to fetch book details for editing');
+//   }
+// };
 
 export const updateBookAvailability = async (id: number, available: boolean) => {
   try {
     const response = await axios.patch(
-      `${BASE_API_URL}/${id}/availability`,
-      { available }, // Envoi des données au backend
-      { headers: { 'Content-Type': 'application/json' } } // En-têtes pour JSON
-    );
-    return response.data; // Retourne les données reçues du backend
+        `${BASE_API_URL}/${id}/availability`,
+      // Envoi des données au backend
+        { available }, 
+      // En-têtes pour JSON
+      { headers: { 'Content-Type': 'application/json' } } 
+      );
+      // Retourne les données reçues du backend
+    return response.data; 
   } catch (error) {
     // Vérification si c'est une erreur Axios
     if (axios.isAxiosError(error)) {
@@ -152,8 +156,8 @@ export const updateBookAvailability = async (id: number, available: boolean) => 
       // Pour les autres types d'erreurs
       console.error('Une erreur inattendue est survenue', (error as Error).message);
     }
-
-    throw error; // Relance l'erreur après l'avoir loggée
+    // Relance l'erreur après l'avoir loggée
+    throw error; 
   }
 };
 
@@ -183,6 +187,45 @@ export const fetchRandomBookFromList = async (): Promise<Book> => {
     } catch (error) {
         console.error("Error fetching books:", error);
         throw new Error("Failed to fetch books");
+    }
+};
+
+
+export const updateBook = async (bookId: number, updatedBookData: Partial<NewBookData>): Promise<Book> => {
+    try {
+        const formattedData = {
+            ...updatedBookData,
+            publishedYear: formatDateForApi(updatedBookData.publishedYear)
+        };
+
+        const response = await axios.put(`${BASE_API_URL}/${bookId}/edit`, formattedData, {
+            headers: { 'Content-Type': 'application/json' }
+        });
+
+        // Convertir les dates reçues du serveur en objets Date
+        const bookData = response.data;
+        return {
+            ...bookData,
+            publishedYear: bookData.publishedYear ? new Date(bookData.publishedYear) : undefined
+        };
+    } catch (error) {
+        console.error('Error updating book:', error);
+        
+        if (axios.isAxiosError(error)) {
+            if (error.response) {
+                if (error.response.status === 404) {
+                    throw new Error(`Book with ID ${bookId} not found`);
+                } else if (error.response.status === 403) {
+                    throw new Error('You do not have permission to update this book');
+                } else if (error.response.status === 500) {
+                    throw new Error('Server error. Please try again later.');
+                }
+            } else if (error.request) {
+                throw new Error('No response received from server. Check your network connection.');
+            }
+        }
+
+        throw new Error('Failed to update book');
     }
 };
 

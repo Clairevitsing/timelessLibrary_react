@@ -28,7 +28,7 @@ const NewBooks: React.FC = () => {
     if (error) return <div className="container alert alert-danger mt-5">{error}</div>;
     
     const handleDetailsClick = (id: number) => {
-        navigate(`/book/${id}`);
+        navigate(`/books/${id}`);
     };
     
     const nextSlide = () => {

@@ -4,4 +4,5 @@ export interface Category {
     name: string;
     // Optional description
     description?: string;
+    books?: any[];
 }

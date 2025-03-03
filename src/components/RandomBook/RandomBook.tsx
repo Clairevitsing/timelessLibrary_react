@@ -23,7 +23,7 @@ const RandomBook: React.FC = () => {
 
     const handleDetailsClick = (id: number) => {
         // Navigate to the book detail page
-        navigate(`/book/${id}`);
+        navigate(`/books/${id}`);
     };
     
     return (

@@ -45,7 +45,7 @@ const NavbarComponent: React.FC = () => {
         <Navbar.Collapse id="basic-navbar-nav">
           <Nav className="mx-auto">
             <Nav.Link as={Link} to="/">Home</Nav.Link>
-            <Nav.Link as={Link} to="/book">Books</Nav.Link>
+            <Nav.Link as={Link} to="/books">Books</Nav.Link>
             <NavDropdown title="Category" id="basic-nav-dropdown">
               {["voluptaten", "evenist", "porro", "vel", "ethh", "police"].map((category) => (
                 <NavDropdown.Item as={Link} to={`/category/${category}`} key={category}>

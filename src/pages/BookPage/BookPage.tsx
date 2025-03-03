@@ -46,7 +46,7 @@ const BookPage = () => {
     // Handlers for navigating to book details
     const handleDetailsClick = (id: number) => {
          // Navigate to the book detail page
-         navigate(`/book/${id}`); 
+         navigate(`/books/${id}`); 
     };
 
     // Pagination navigation handlers
@@ -89,7 +89,7 @@ const BookPage = () => {
 
                 {isAdmin && (
                     <div>
-                    <Link to="/book/new" className="btn btn-primary">
+                    <Link to="/books/new" className="btn btn-primary">
                         Add New Book
                     </Link>
                     </div>

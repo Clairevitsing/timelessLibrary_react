@@ -6,7 +6,7 @@ import { useAuth } from '../../context/useAuth';
 import { useSelector, useDispatch } from 'react-redux';
 import { addToCart, removeFromCart } from '../../slices/cartSlice'; 
 import { RootState } from '../../redux/store'; 
-import './BookDetailPage.css'; // Import du fichier CSS séparé
+import './BookDetailPage.css'; 
 
 const BookDetailPage = () => {
   const { id } = useParams();
@@ -39,7 +39,7 @@ const BookDetailPage = () => {
       try {
         await deleteBook(parseInt(id));
         // Redirige vers la page des livres après suppression
-        navigate('/book');
+        navigate('/books');
       } catch (err) {
         setError('Failed to delete book');
       }
@@ -119,7 +119,7 @@ const BookDetailPage = () => {
           {/* Section des boutons administrateur (si l'utilisateur est admin) */}
           {isAdmin && (
             <div className="card-body admin-actions">
-              <button onClick={() => navigate(`/edit-book/${book.id}`)} className="btn btn-secondary">
+              <button onClick={() => navigate(`/books/${book.id}/edit`)} className="btn btn-secondary">
                 Edit
               </button>
               <button onClick={handleDeleteBook} className="btn btn-danger">

@@ -9,7 +9,7 @@ import RegisterPage from "../pages/RegisterPage/RegisterPage";
 import CategoryPage from "../pages/CategoryPage/CategoryPage";
 import BookDetailPage from "../pages/BookDetailPage/BookDetailPage";
 import BookCreateForm from "../pages/BookCreateForm/BookCreateForm";
-import BookEditPage from "../pages/BookEditPage/BookEditPage";
+import EditBookPage from "../pages/EditBookPage/EditBookPage";
 import Cart from "../components/Cart/Cart";
 import LoanDetails from "../components/Loan/LoanDetails";
 import LoanDetailsPage from "../pages/LoanDetailsPage/LoanDetailsPage";
@@ -21,7 +21,7 @@ export const router = createBrowserRouter([
         children: [
             { index: true, element: <HomePage /> },
             { path: "search", element: <SearchPage /> },
-            { path: "book", element: <BookPage /> },
+            { path: "books", element: <BookPage /> },
             { path: "contact", element: <Contact /> },
             { path: "login", element: <LoginPage /> },
             { path: "register", element: <RegisterPage /> },
@@ -29,9 +29,9 @@ export const router = createBrowserRouter([
             { path: "cart", element: <Cart /> },  
             { path: "loanDetailsPage", element:<LoanDetailsPage />},
             { path: "loanDetails", element: <LoanDetails /> }, 
-            { path: "book/:id", element: <BookDetailPage /> },
-            { path: "book/edit", element: <BookEditPage /> },
-            { path: "book/new", element: <BookCreateForm /> },
+            { path: "books/:id", element: <BookDetailPage /> },
+            { path: "books/:bookId/edit", element: <EditBookPage /> },
+            { path: "books/new", element: <BookCreateForm /> },
         ]
     }
 ]);
