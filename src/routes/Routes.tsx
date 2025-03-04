@@ -14,6 +14,7 @@ import Cart from "../components/Cart/Cart";
 import LoanDetails from "../components/Loan/LoanDetails";
 import LoanDetailsPage from "../pages/LoanDetailsPage/LoanDetailsPage";
 import CategoryBooks from "../components/CategoryBooks/CategoryBooks";
+import CreateCategoryForm from "../components/CreateCategoryForm/CreateCategoryForm";
 
 export const router = createBrowserRouter([
     {
@@ -35,6 +36,7 @@ export const router = createBrowserRouter([
             { path: "books/new", element: <BookCreateForm /> },
             { path: "categories", element: <CategoryPage /> },
             { path: "categories/:categoryId/books", element: <CategoryBooks /> },
+            { path: "categories/new", element: <CreateCategoryForm /> },
         ]
     }
 ]);

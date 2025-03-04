@@ -38,9 +38,9 @@ export const fetchCategoryById = async (categoryId: number): Promise<Category> =
   }
 };
 
-export const createCategory = async (categoryData: { name: string }) => {
+export const createNewCategory = async (categoryData: { name: string, description: string }) => {
   try {
-    const response = await axios.post(BASE_API_URL, categoryData);
+    const response = await axios.post(`${BASE_API_URL}/new`, categoryData);
     return response.data;
   } catch (error) {
     console.error('Error creating category:', error);
