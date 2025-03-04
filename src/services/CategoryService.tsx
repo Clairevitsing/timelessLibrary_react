@@ -37,3 +37,22 @@ export const fetchCategoryById = async (categoryId: number): Promise<Category> =
     throw new Error('Échec de la récupération de la catégorie');
   }
 };
+
+export const createCategory = async (categoryData: { name: string }) => {
+  try {
+    const response = await axios.post(BASE_API_URL, categoryData);
+    return response.data;
+  } catch (error) {
+    console.error('Error creating category:', error);
+    throw error;
+  }
+};
+
+export const deleteCategory = async (categoryId: number): Promise<void> => {
+  try {
+    await axios.delete(`${BASE_API_URL}/${categoryId}`);
+  } catch (error) {
+    console.error('Error deleting category:', error);
+    throw error;
+  }
+};

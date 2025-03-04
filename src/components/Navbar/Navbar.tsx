@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Navbar, Nav, NavDropdown, Container } from 'react-bootstrap';
+import { Navbar, Nav,  Container } from 'react-bootstrap';
 import { Link } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faSignInAlt, faSignOutAlt, faShoppingCart, faUser } from '@fortawesome/free-solid-svg-icons';
@@ -46,13 +46,14 @@ const NavbarComponent: React.FC = () => {
           <Nav className="mx-auto">
             <Nav.Link as={Link} to="/">Home</Nav.Link>
             <Nav.Link as={Link} to="/books">Books</Nav.Link>
-            <NavDropdown title="Category" id="basic-nav-dropdown">
+            <Nav.Link as={Link} to="/categories">Categories</Nav.Link>
+            {/* <NavDropdown title="Category" id="basic-nav-dropdown">
               {["voluptaten", "evenist", "porro", "vel", "ethh", "police"].map((category) => (
                 <NavDropdown.Item as={Link} to={`/category/${category}`} key={category}>
                   {category}
                 </NavDropdown.Item>
               ))}
-            </NavDropdown>
+            </NavDropdown> */}
             <Nav.Link as={Link} to="/contact">Contact</Nav.Link>
           </Nav>
           <Nav>
