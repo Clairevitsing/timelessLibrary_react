@@ -3,11 +3,30 @@ import { useForm, Controller } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import * as Yup from 'yup';
 import { useNavigate } from 'react-router-dom';
-import { NewBookData, BookFormData } from '../../models/Book';
+import { NewBookData } from '../../models/Book';
 import { createNewBook } from '../../services/BookService';
 import { fetchCategories } from '../../services/CategoryService';
+import styles from './BookCreateForm.module.css'; 
 
 type Category = { id: number; name: string };
+
+type AuthorData = {
+  id?: number;
+  firstName: string;
+  lastName: string;
+};
+
+type BookFormData = {
+  title: string;
+  ISBN: string;
+  publishedYear: string;
+  description: string;
+  image: string;
+  available: boolean;
+  categoryName: string;
+  authors: AuthorData[];
+  authorIds: number[];
+};
 
 const bookSchema = Yup.object().shape({
   title: Yup.string().required('Title is required'),
@@ -17,7 +36,14 @@ const bookSchema = Yup.object().shape({
   image: Yup.string().required('Image is required'),
   available: Yup.boolean(),
   categoryName: Yup.string().required('Category is required'),
-  authorIds: Yup.array().of(Yup.number().positive()).min(1, 'At least one author is required')
+  authors: Yup.array()
+    .of(
+      Yup.object().shape({
+        firstName: Yup.string().required('Author first name is required'),
+        lastName: Yup.string().required('Author last name is required'),
+      })
+    )
+    .min(1, 'At least one author is required'),
 });
 
 const BookCreateForm = () => {
@@ -26,14 +52,23 @@ const BookCreateForm = () => {
   const [submitSuccess, setSubmitSuccess] = useState(false);
   const [categories, setCategories] = useState<Category[]>([]);
   const [isLoadingCategories, setIsLoadingCategories] = useState(false);
-  
-  const { register, handleSubmit, setValue, watch, control, formState: { errors }, reset } = useForm<BookFormData>({
-    resolver: yupResolver(bookSchema),
+
+  const {
+    register,
+    handleSubmit,
+    setValue,
+    watch,
+    control,
+    formState: { errors },
+    reset,
+  } = useForm<BookFormData>({
+    resolver: yupResolver(bookSchema) as any,
     defaultValues: {
       available: false,
+      authors: [{ firstName: '', lastName: '' }],
       authorIds: [],
       categoryName: '',
-    }
+    },
   });
 
   const navigate = useNavigate();
@@ -61,13 +96,14 @@ const BookCreateForm = () => {
     setSubmitSuccess(false);
 
     try {
-      const selectedCategory = categories.find(cat => cat.name === data.categoryName);
+      const selectedCategory = categories.find((cat) => cat.name === data.categoryName);
       if (!selectedCategory) throw new Error('Selected category not found');
 
       const newBookData: NewBookData = {
         ...data,
         publishedYear: data.publishedYear.split('T')[0],
-        categoryId: selectedCategory.id
+        categoryId: selectedCategory.id,
+        authorIds: data.authors.map((author) => author.id!).filter((id) => id !== undefined),
       };
 
       const newBook = await createNewBook(newBookData);
@@ -75,40 +111,40 @@ const BookCreateForm = () => {
       reset();
       navigate(`/books/${newBook.id}`);
     } catch (error: any) {
-      setSubmitError(error.message || 'Failed to create new book.');
+      setSubmitError(error.message || 'Failed to create the book.');
     } finally {
       setIsSubmitting(false);
     }
   };
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)}>
-      <div>
+    <form onSubmit={handleSubmit(onSubmit)} className={styles.formContainer}>
+      <div className={styles.formGroup}>
         <label>Title</label>
         <input {...register('title')} placeholder="Title" />
-        {errors.title && <p>{errors.title.message}</p>}
+        {errors.title && <p className={styles.errorMessage}>{errors.title.message}</p>}
       </div>
-      <div>
+      <div className={styles.formGroup}>
         <label>ISBN</label>
         <input {...register('ISBN')} placeholder="ISBN" />
-        {errors.ISBN && <p>{errors.ISBN.message}</p>}
+        {errors.ISBN && <p className={styles.errorMessage}>{errors.ISBN.message}</p>}
       </div>
-      <div>
+      <div className={styles.formGroup}>
         <label>Published Year</label>
         <input type="date" {...register('publishedYear')} />
-        {errors.publishedYear && <p>{errors.publishedYear.message}</p>}
+        {errors.publishedYear && <p className={styles.errorMessage}>{errors.publishedYear.message}</p>}
       </div>
-      <div>
+      <div className={styles.formGroup}>
         <label>Description</label>
         <textarea {...register('description')} placeholder="Description" />
-        {errors.description && <p>{errors.description.message}</p>}
+        {errors.description && <p className={styles.errorMessage}>{errors.description.message}</p>}
       </div>
-      <div>
+      <div className={styles.formGroup}>
         <label>Image</label>
         <input
           type="file"
           accept="image/*"
-          onChange={e => {
+          onChange={(e) => {
             const file = e.target.files?.[0];
             if (file) {
               const reader = new FileReader();
@@ -120,59 +156,89 @@ const BookCreateForm = () => {
             }
           }}
         />
-        {errors.image && <p>{errors.image.message}</p>}
-        {watch('image') && <img src={watch('image')} alt="Preview" style={{ maxWidth: '200px' }} />}
+        {errors.image && <p className={styles.errorMessage}>{errors.image.message}</p>}
+        {watch('image') && <img src={watch('image')} alt="Preview" className={styles.previewImage} />}
       </div>
-      <div>
+      <div className={styles.formGroup}>
         <label>Availability</label>
         <input type="checkbox" {...register('available')} />
       </div>
-      <div>
+      <div className={styles.formGroup}>
         <label>Category</label>
         {isLoadingCategories ? (
           <p>Loading categories...</p>
         ) : (
           <select {...register('categoryName')}>
-            {categories.map(category => (
+            {categories.map((category) => (
               <option key={category.id} value={category.name}>
                 {category.name}
               </option>
             ))}
           </select>
         )}
-        {errors.categoryName && <p>{errors.categoryName.message}</p>}
+        {errors.categoryName && <p className={styles.errorMessage}>{errors.categoryName.message}</p>}
       </div>
-      <div>
-        <label>Author IDs (comma-separated)</label>
+      <div className={styles.formGroup}>
+        <label>Authors</label>
         <Controller
-          name="authorIds"
+          name="authors"
           control={control}
           render={({ field }) => (
-            <input
-              {...field}
-              onChange={e => {
-                const parsedIds = e.target.value
-                  .split(',')
-                  .map(id => parseInt(id.trim(), 10))
-                  .filter(id => !isNaN(id));
-                field.onChange(parsedIds);
-              }}
-              value={Array.isArray(field.value) ? field.value.join(', ') : ''}
-              placeholder="Author IDs"
-            />
+            <div>
+              {field.value.map((author, index) => (
+                <div key={index} className={styles.authorInputGroup}>
+                  <input
+                    placeholder="First Name"
+                    value={author.firstName}
+                    onChange={(e) => {
+                      const newAuthors = [...field.value];
+                      newAuthors[index] = { ...newAuthors[index], firstName: e.target.value };
+                      field.onChange(newAuthors);
+                    }}
+                  />
+                  <input
+                    placeholder="Last Name"
+                    value={author.lastName}
+                    onChange={(e) => {
+                      const newAuthors = [...field.value];
+                      newAuthors[index] = { ...newAuthors[index], lastName: e.target.value };
+                      field.onChange(newAuthors);
+                    }}
+                  />
+                  {index > 0 && (
+                    <button
+                      type="button"
+                      className={styles.removeAuthorButton}
+                      onClick={() => {
+                        const newAuthors = field.value.filter((_, i) => i !== index);
+                        field.onChange(newAuthors);
+                      }}
+                    >
+                      Remove
+                    </button>
+                  )}
+                </div>
+              ))}
+              <button
+                type="button"
+                className={styles.addAuthorButton}
+                onClick={() => field.onChange([...field.value, { firstName: '', lastName: '' }])}
+              >
+                Add Author
+              </button>
+            </div>
           )}
         />
-        {errors.authorIds && <p>{errors.authorIds.message}</p>}
+        {errors.authors && <p className={styles.errorMessage}>{errors.authors.message}</p>}
       </div>
-      <button type="submit" disabled={isSubmitting}>
+      <button type="submit" disabled={isSubmitting} className={styles.submitButton}>
         {isSubmitting ? 'Creating...' : 'Create Book'}
       </button>
 
-      {submitError && <p style={{ color: 'red' }}>{submitError}</p>}
-      {submitSuccess && <p style={{ color: 'green' }}>Book created successfully!</p>}
+      {submitError && <p className={styles.errorMessage}>{submitError}</p>}
+      {submitSuccess && <p className={styles.successMessage}>Book successfully created!</p>}
     </form>
   );
 };
 
 export default BookCreateForm;
-
