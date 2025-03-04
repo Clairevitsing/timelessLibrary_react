@@ -48,6 +48,16 @@ export const createNewCategory = async (categoryData: { name: string, descriptio
   }
 };
 
+export const updateCategory = async (id: number, categoryData: { name: string, description: string }) => {
+  try {
+    const response = await axios.put(`${BASE_API_URL}/${id}/edit`, categoryData);
+    return response.data;
+  } catch (error) {
+    console.error('Error updating category:', error);
+    throw error;
+  }
+};
+
 export const deleteCategory = async (categoryId: number): Promise<void> => {
   try {
     await axios.delete(`${BASE_API_URL}/${categoryId}`);
