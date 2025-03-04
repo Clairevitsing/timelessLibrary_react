@@ -25,7 +25,19 @@ export type NewBookData = {
     categoryId: number;
 }
 
-// Define specific type for the form that matches the Yup schema
+// // Define specific type for the form that matches the Yup schema
+// export type BookFormData = {
+//   title: string;
+//   ISBN: string;
+//   publishedYear: string;
+//   description: string;
+//   image: string;
+//   available: boolean;
+//   categoryId: number;
+//   authorIds: number[];
+// };
+
+// Type pour les données du formulaire
 export type BookFormData = {
   title: string;
   ISBN: string;
@@ -33,11 +45,11 @@ export type BookFormData = {
   description: string;
   image: string;
   available: boolean;
-  categoryId: number;
+  categoryName: string; 
   authorIds: number[];
 };
 
-// Fonction utilitaire pour convertir une date en format YYYY-MM-DD pour l'API
+// // Fonction utilitaire pour convertir une date en format YYYY-MM-DD pour l'API
 export function formatDateForApi(date: Date | string | undefined): string | undefined {
     if (!date) return undefined;
     

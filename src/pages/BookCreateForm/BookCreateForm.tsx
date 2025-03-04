@@ -1,22 +1,13 @@
-import React, { useEffect, useState} from 'react';
+import React, { useEffect, useState } from 'react';
 import { useForm, Controller } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import * as Yup from 'yup';
-import { NewBookData } from '../../models/Book';
-import { createNewBook } from '../../services/BookService';
 import { useNavigate } from 'react-router-dom';
+import { NewBookData, BookFormData } from '../../models/Book';
+import { createNewBook } from '../../services/BookService';
+import { fetchCategories } from '../../services/CategoryService';
 
-// Définir un type spécifique pour le formulaire qui correspond exactement au schéma Yup
-type BookFormData = {
-  title: string;
-  ISBN: string;
-  publishedYear: string;
-  description: string;
-  image: string;
-  available: boolean;
-  categoryId: number;
-  authorIds: number[];
-};
+type Category = { id: number; name: string };
 
 const bookSchema = Yup.object().shape({
   title: Yup.string().required('Title is required'),
@@ -24,57 +15,67 @@ const bookSchema = Yup.object().shape({
   publishedYear: Yup.string().required('Published year is required'),
   description: Yup.string().required('Description is required'),
   image: Yup.string().required('Image is required'),
-  available: Yup.boolean().required('Availability is required'),
-  categoryId: Yup.number()
-    .required('Category ID is required')
-    .integer('Category ID must be an integer')
-    .min(1, 'Category ID must be at least 1'),
-  authorIds: Yup.array()
-    .of(Yup.number().required('Valid author ID is required'))
-    .required('At least one author is required')
+  available: Yup.boolean(),
+  categoryName: Yup.string().required('Category is required'),
+  authorIds: Yup.array().of(Yup.number().positive()).min(1, 'At least one author is required')
 });
 
 const BookCreateForm = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [submitSuccess, setSubmitSuccess] = useState(false);
+  const [categories, setCategories] = useState<Category[]>([]);
+  const [isLoadingCategories, setIsLoadingCategories] = useState(false);
   
-  // Utilisez BookFormData au lieu de NewBookData pour le formulaire
   const { register, handleSubmit, setValue, watch, control, formState: { errors }, reset } = useForm<BookFormData>({
     resolver: yupResolver(bookSchema),
     defaultValues: {
       available: false,
       authorIds: [],
+      categoryName: '',
     }
   });
 
-  // Ensure to set up form fields properly
-  useEffect(() => {
-    register('authorIds');
-  }, [register]);
-
   const navigate = useNavigate();
-    
+
+  useEffect(() => {
+    const loadCategories = async () => {
+      setIsLoadingCategories(true);
+      try {
+        const categoriesData = await fetchCategories();
+        setCategories(categoriesData);
+        if (categoriesData.length > 0) setValue('categoryName', categoriesData[0].name);
+      } catch (error: any) {
+        setSubmitError(error.message || 'Failed to load categories.');
+      } finally {
+        setIsLoadingCategories(false);
+      }
+    };
+
+    loadCategories();
+  }, [setValue]);
+
   const onSubmit = async (data: BookFormData) => {
     setIsSubmitting(true);
     setSubmitError(null);
     setSubmitSuccess(false);
 
     try {
-      // Convertir les données du formulaire en NewBookData
+      const selectedCategory = categories.find(cat => cat.name === data.categoryName);
+      if (!selectedCategory) throw new Error('Selected category not found');
+
       const newBookData: NewBookData = {
         ...data,
-        publishedYear: new Date(data.publishedYear).toISOString().split('T')[0],
+        publishedYear: data.publishedYear.split('T')[0],
+        categoryId: selectedCategory.id
       };
-      
+
       const newBook = await createNewBook(newBookData);
-      console.log('New book created:', newBook);
       setSubmitSuccess(true);
       reset();
       navigate(`/books/${newBook.id}`);
-    } catch (error) {
-      console.error('Error creating book:', error);
-      setSubmitError('Failed to create new book. Please try again.');
+    } catch (error: any) {
+      setSubmitError(error.message || 'Failed to create new book.');
     } finally {
       setIsSubmitting(false);
     }
@@ -82,7 +83,6 @@ const BookCreateForm = () => {
 
   return (
     <form onSubmit={handleSubmit(onSubmit)}>
-      {/* Le reste du formulaire reste inchangé */}
       <div>
         <label>Title</label>
         <input {...register('title')} placeholder="Title" />
@@ -109,31 +109,38 @@ const BookCreateForm = () => {
           type="file"
           accept="image/*"
           onChange={e => {
-            const file = e.target.files ? e.target.files[0] : null;
+            const file = e.target.files?.[0];
             if (file) {
               const reader = new FileReader();
-              reader.onloadend = () => {
-                setValue('image', reader.result as string);
+              reader.onload = () => {
+                if (reader.result) setValue('image', reader.result.toString());
               };
-              reader.onerror = () => {
-                console.error('Error occurred while reading the file.');
-                setSubmitError('An error occurred while reading the file.');
-              };
+              reader.onerror = () => setSubmitError('An error occurred while reading the file.');
               reader.readAsDataURL(file);
             }
           }}
         />
         {errors.image && <p>{errors.image.message}</p>}
-        <img src={watch('image')} alt="Preview" style={{ maxWidth: '200px', maxHeight: '200px' }} />
+        {watch('image') && <img src={watch('image')} alt="Preview" style={{ maxWidth: '200px' }} />}
       </div>
       <div>
         <label>Availability</label>
         <input type="checkbox" {...register('available')} />
       </div>
       <div>
-        <label>Category ID</label>
-        <input type="number" {...register('categoryId')} placeholder="Category ID" />
-        {errors.categoryId && <p>{errors.categoryId.message}</p>}
+        <label>Category</label>
+        {isLoadingCategories ? (
+          <p>Loading categories...</p>
+        ) : (
+          <select {...register('categoryName')}>
+            {categories.map(category => (
+              <option key={category.id} value={category.name}>
+                {category.name}
+              </option>
+            ))}
+          </select>
+        )}
+        {errors.categoryName && <p>{errors.categoryName.message}</p>}
       </div>
       <div>
         <label>Author IDs (comma-separated)</label>
@@ -143,9 +150,9 @@ const BookCreateForm = () => {
           render={({ field }) => (
             <input
               {...field}
-              onChange={(e) => {
-                const value = e.target.value;
-                const parsedIds = value.split(',')
+              onChange={e => {
+                const parsedIds = e.target.value
+                  .split(',')
                   .map(id => parseInt(id.trim(), 10))
                   .filter(id => !isNaN(id));
                 field.onChange(parsedIds);
@@ -168,3 +175,4 @@ const BookCreateForm = () => {
 };
 
 export default BookCreateForm;
+

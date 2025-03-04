@@ -65,3 +65,24 @@ export const addNewAuthor = async (authorData: Omit<Author, 'id'>): Promise<Auth
     throw new Error('Failed to add new author');
   }
 };
+
+export const updateAuthor = async (authorId: number, authorData: Omit<Author, 'id'>): Promise<Author> => {
+  try {
+    const response = await axios.put(`${BASE_API_URL}/${authorId}`, authorData);
+    
+    if (!response.data) {
+      throw new Error('No author data returned after update');
+    }
+    
+    return {
+      id: response.data.id,
+      firstName: response.data.firstName,
+      lastName: response.data.lastName,
+      birthDate: response.data.birthDate ? new Date(response.data.birthDate) : null,
+      biography: response.data.biography
+    };
+  } catch (error) {
+    console.error(`Error updating author ${authorId}:`, error);
+    throw new Error('Failed to update author');
+  }
+};

@@ -2,27 +2,17 @@ import React, { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import * as Yup from 'yup';
-import { Book, NewBookData } from '../../models/Book';
+import { Book, NewBookData, BookFormData } from '../../models/Book';
 import { fetchBookDetails, updateBook } from '../../services/BookService';
 import { fetchCategories } from '../../services/CategoryService';
 import { useNavigate, useParams } from 'react-router-dom';
 import { Category } from '../../models/Category';
 import { Author } from '../../models/Author';
 import AuthorEditor from '../../components/AuthorEditor/AuthorEditor';
-import { addNewAuthor, fetchAuthors } from '../../services/AuthorService';
+import { addNewAuthor, fetchAuthors,updateAuthor } from '../../services/AuthorService';
 import './EditBookPage.css';
 
-// Type pour les données du formulaire
-type BookFormData = {
-  title: string;
-  ISBN: string;
-  publishedYear: string;
-  description: string;
-  image: string;
-  available: boolean;
-  categoryName: string; 
-  authorIds: number[];
-};
+
 
 // Schéma de validation
 const bookSchema = Yup.object().shape({
@@ -158,27 +148,35 @@ const EditBookPage = () => {
   // Gestion de la sauvegarde d'un auteur
   const handleSaveAuthor = async (authorData: Omit<Author, 'id'>): Promise<Author> => {
     try {
-      const savedAuthor = await addNewAuthor(authorData);
+    // If currentAuthor exists and has a valid ID, we're editing an existing author
+    if (currentAuthor && currentAuthor.id) {
+      console.log('Updating existing author:', currentAuthor.id, authorData);
       
-      setAuthors(prevAuthors => [...prevAuthors, savedAuthor]);
-      
-      const updatedAuthorIds = [...watchAuthorIds];
-      if (!updatedAuthorIds.includes(savedAuthor.id)) {
-        updatedAuthorIds.push(savedAuthor.id);
-        setValue('authorIds', updatedAuthorIds, { shouldValidate: true });
+      try {
+        const updatedAuthor = await updateAuthor(currentAuthor.id, authorData);
+        console.log('Author updated successfully:', updatedAuthor);
+        
+        // Rest of your code...
+        
+        return updatedAuthor;
+      } catch (updateError) {
+        console.error('Specific error updating author:', updateError);
+        throw updateError;
       }
+    } else {
+      console.log('Creating new author:', authorData);
+      const savedAuthor = await addNewAuthor(authorData);
+      console.log('Author created successfully:', savedAuthor);
       
-      setBookAuthors(prev => [...prev, savedAuthor]);
-      
-      setShowAuthorForm(false);
-      setCurrentAuthor(null);
+      // Rest of your code...
       
       return savedAuthor;
-    } catch (error) {
-      console.error('Error saving author:', error);
-      throw new Error('Failed to save author');
     }
-  };
+  } catch (error) {
+    console.error('Error in handleSaveAuthor:', error);
+    throw new Error('Failed to save author');
+  }
+};
 
   // Gestion de l'édition d'un auteur
   const handleEditAuthor = (author: Author) => {
