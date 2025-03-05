@@ -276,7 +276,8 @@ const EditBookPage = () => {
     id: 0,
     firstName: '',
     lastName: '',
-    biography: ''
+    biography: '',
+    birthDate: null
   });
 
   if (isLoading) {

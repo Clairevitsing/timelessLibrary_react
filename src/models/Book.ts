@@ -1,4 +1,4 @@
-import { Author } from './Author';
+import { Author,AuthorFormData } from './Author';
 import { Category } from './Category';
 
 export type Book = {
@@ -21,7 +21,7 @@ export interface BookFormData {
   image: string;
   available: boolean;
   categoryName: string;
-  authors: Author[];
+  authors: AuthorFormData[];
   authorIds?: number[];
 }
 

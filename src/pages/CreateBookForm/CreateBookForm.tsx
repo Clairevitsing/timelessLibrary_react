@@ -5,12 +5,15 @@ import * as Yup from 'yup';
 import { useNavigate } from 'react-router-dom';
 import { NewBookData, BookFormData } from '../../models/Book';
 import { Category } from '../../models/Category';
+import { AuthorFormData } from '../../models/Author';
 import { createBook } from '../../services/BookService';
+import { findOrCreateAuthor } from '../../services/AuthorService';
 import { fetchCategories } from '../../services/CategoryService';
 import styles from './CreateBookForm.module.css';
 
 
 
+// Enhanced validation schema
 const bookSchema = Yup.object().shape({
   title: Yup.string().required('Title is required'),
   ISBN: Yup.string().required('ISBN is required'),
@@ -19,14 +22,27 @@ const bookSchema = Yup.object().shape({
   image: Yup.string().required('Image is required'),
   available: Yup.boolean(),
   categoryName: Yup.string().required('Category is required'),
-  authors: Yup.array()
+ authors: Yup.array()
     .of(
       Yup.object().shape({
-        firstName: Yup.string().required('Author first name is required'),
-        lastName: Yup.string().required('Author last name is required'),
+        firstName: Yup.string()
+          .trim()
+          .required('Author first name is required')
+          .min(2, 'First name must be at least 2 characters'),
+        lastName: Yup.string()
+          .trim()
+          .required('Author last name is required')
+          .min(2, 'Last name must be at least 2 characters'),
+        biography: Yup.string()
+          .trim()
+          .required('Author biography is required')
+          .min(10, 'Biography must be at least 10 characters'),
+        birthDate: Yup.date()
+          .required('Author birth date is required')
+          .max(new Date(), 'Birth date cannot be in the future')
       })
     )
-    .min(1, 'At least one author is required'),
+    .min(1, 'At least one author is required')
 });
 
 const BookCreateForm = () => {
@@ -48,7 +64,12 @@ const BookCreateForm = () => {
     resolver: yupResolver(bookSchema) as any,
     defaultValues: {
       available: false,
-      authors: [{ firstName: '', lastName: '' }],
+      authors: [{
+        firstName: '',
+        lastName: '',
+        biography: '',
+        birthDate: ''
+      }],
       authorIds: [],
       categoryName: '',
     },
@@ -79,6 +100,18 @@ const BookCreateForm = () => {
     setSubmitSuccess(false);
 
     try {
+      // Find or create authors and get their IDs
+      const authorIds = await Promise.all(
+        data.authors.map(async (author) => {
+          return await findOrCreateAuthor(
+            author.firstName, 
+            author.lastName, 
+            author.biography, 
+            author.birthDate
+          );
+        })
+      );
+
       const selectedCategory = categories.find((cat) => cat.name === data.categoryName);
       if (!selectedCategory) throw new Error('Selected category not found');
 
@@ -86,7 +119,7 @@ const BookCreateForm = () => {
         ...data,
         publishedYear: data.publishedYear.split('T')[0],
         categoryId: selectedCategory.id,
-        authorIds: data.authors.map((author) => author.id!).filter((id) => id !== undefined),
+        authorIds: authorIds, 
       };
 
       const newBook = await createBook(newBookData);
@@ -170,50 +203,119 @@ const BookCreateForm = () => {
           name="authors"
           control={control}
           render={({ field }) => (
-            <div>
+            <div className={styles.authorsContainer}>
               {field.value.map((author, index) => (
-                <div key={index} className={styles.authorInputGroup}>
-                  <input
-                    placeholder="First Name"
-                    value={author.firstName}
-                    onChange={(e) => {
-                      const newAuthors = [...field.value];
-                      newAuthors[index] = { ...newAuthors[index], firstName: e.target.value };
-                      field.onChange(newAuthors);
-                    }}
-                  />
-                  <input
-                    placeholder="Last Name"
-                    value={author.lastName}
-                    onChange={(e) => {
-                      const newAuthors = [...field.value];
-                      newAuthors[index] = { ...newAuthors[index], lastName: e.target.value };
-                      field.onChange(newAuthors);
-                    }}
-                  />
-                  {index > 0 && (
-                    <button
-                      type="button"
-                      className={styles.removeAuthorButton}
-                      onClick={() => {
-                        const newAuthors = field.value.filter((_, i) => i !== index);
-                        field.onChange(newAuthors);
-                      }}
-                    >
-                      Remove
-                    </button>
-                  )}
+                <div key={index} className={styles.authorSection}>
+                  <div className={styles.authorInputGroup}>
+                    <div className={styles.nameInputs}>
+                      <div className={styles.inputWrapper}>
+                        <label>First Name</label>
+                        <input
+                          placeholder="First Name"
+                          value={author.firstName}
+                          onChange={(e) => {
+                            const newAuthors = [...field.value];
+                            newAuthors[index] = { ...newAuthors[index], firstName: e.target.value };
+                            field.onChange(newAuthors);
+                          }}
+                        />
+                        {errors.authors?.[index]?.firstName && (
+                          <p className={styles.errorMessage}>
+                            {errors.authors[index]?.firstName?.message}
+                          </p>
+                        )}
+                      </div>
+                      
+                      <div className={styles.inputWrapper}>
+                        <label>Last Name</label>
+                        <input
+                          placeholder="Last Name"
+                          value={author.lastName}
+                          onChange={(e) => {
+                            const newAuthors = [...field.value];
+                            newAuthors[index] = { ...newAuthors[index], lastName: e.target.value };
+                            field.onChange(newAuthors);
+                          }}
+                        />
+                        {errors.authors?.[index]?.lastName && (
+                          <p className={styles.errorMessage}>
+                            {errors.authors[index]?.lastName?.message}
+                          </p>
+                        )}
+                      </div>
+                    </div>
+
+                    <div className={styles.inputWrapper}>
+                      <label>Biography</label>
+                      <textarea
+                        placeholder="Author Biography"
+                        value={author.biography}
+                        onChange={(e) => {
+                          const newAuthors = [...field.value];
+                          newAuthors[index] = { ...newAuthors[index], biography: e.target.value };
+                          field.onChange(newAuthors);
+                        }}
+                      />
+                      {errors.authors?.[index]?.biography && (
+                        <p className={styles.errorMessage}>
+                          {errors.authors[index]?.biography?.message}
+                        </p>
+                      )}
+                    </div>
+
+                    <div className={styles.inputWrapper}>
+                      <label>Birth Date</label>
+                      <input
+                        type="date"
+                        value={author.birthDate}
+                        onChange={(e) => {
+                          const newAuthors = [...field.value];
+                          newAuthors[index] = { ...newAuthors[index], birthDate: e.target.value };
+                          field.onChange(newAuthors);
+                        }}
+                      />
+                      {errors.authors?.[index]?.birthDate && (
+                        <p className={styles.errorMessage}>
+                          {errors.authors[index]?.birthDate?.message}
+                        </p>
+                      )}
+                    </div>
+
+                    {index > 0 && (
+                      <div className={styles.removeAuthorContainer}>
+                        <button
+                          type="button"
+                          className={styles.removeAuthorButton}
+                          onClick={() => {
+                            const newAuthors = field.value.filter((_, i) => i !== index);
+                            field.onChange(newAuthors);
+                          }}
+                        >
+                          Remove Author
+                        </button>
+                      </div>
+                    )}
+                  </div>
                 </div>
               ))}
-             <div className={styles.buttonContainer}>
-    <button
-        type="button"
-        className={styles.addAuthorButton}
-        onClick={() => field.onChange([...field.value, { firstName: '', lastName: '' }])}
-    >
-        Add Author
-    </button>
-</div>
+              
+              <div className={styles.buttonContainer}>
+                <button
+                  type="button"
+                  className={styles.addAuthorButton}
+                  onClick={() => field.onChange([
+                    ...field.value, 
+                    { 
+                      firstName: '', 
+                      lastName: '', 
+                      biography: '', 
+                      birthDate: '' 
+                    }
+                  ])}
+                >
+                  Add Another Author
+                </button>
+              </div>
             </div>
           )}
         />

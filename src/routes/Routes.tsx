@@ -8,7 +8,7 @@ import LoginPage from "../pages/LoginPage/LoginPage";
 import RegisterPage from "../pages/RegisterPage/RegisterPage";
 import CategoryPage from "../pages/CategoryPage/CategoriesPage";
 import BookDetail from "../components/BookDetail/BookDetail";
-import CreateBookForm from "../pages/BookCreateForm/CreateBookForm";
+import CreateBookForm from "../pages/CreateBookForm/CreateBookForm";
 import EditBookPage from "../pages/EditBookPage/EditBookPage";
 import Cart from "../components/Cart/Cart";
 import LoanDetails from "../components/Loan/LoanDetails";
