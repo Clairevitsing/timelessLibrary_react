@@ -26,7 +26,9 @@ export type AuthorSearchParams = {
 
 // Type for creating a new author (omitting ID)
 export type AuthorCreationData = Omit<Author, 'id'> & {
-  books?: Book[]; // Optional for creation
+  // Optional for creation
+  // books?: Book[]; 
+   bookIds: number[];
 }
 
 // Optional: Type for API response during author creation

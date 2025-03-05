@@ -112,8 +112,9 @@ export const searchAuthors = async (
 export const findOrCreateAuthor = async (
   firstName: string,
   lastName: string,
-  biography: string, 
-  birthDate: string
+  biography: string = '', 
+  birthDate: string = '',
+  bookIds: number[] = [] 
 ): Promise<number> => {
   try {
     // Search parameters
@@ -134,10 +135,11 @@ export const findOrCreateAuthor = async (
 
     // If no author found, create new author
     const newAuthorData: AuthorCreationData = {
-      firstName,
-      lastName,
-      biography: biography || `Biography for ${firstName} ${lastName}`,
-      birthDate: birthDate ? new Date(birthDate) : null
+      firstName: firstName.trim(),
+      lastName: lastName.trim(),
+      biography: biography?.trim() || `Biography for ${firstName} ${lastName}`,
+      birthDate: birthDate ? new Date(birthDate) : null,
+      bookIds: bookIds 
     };
 
     // Create the new author
@@ -151,14 +153,13 @@ export const findOrCreateAuthor = async (
 };
 
 
-export const addNewAuthor = async (authorData: Omit<Author, 'id'>): Promise<Author> => {
+export const addNewAuthor = async (
+  authorData: Omit<Author, 'id'> & { bookIds?: number[] }
+): Promise<Author> => {
   try {
-    // Validate required fields
-    if (!authorData.firstName || !authorData.lastName) {
-      throw new Error('First name and last name are required');
-    }
+    // Default to empty array if no book IDs provided
+    const bookIds = authorData.bookIds || [];
 
-    // Prepare payload with explicit typing and logging
     const postData = {
       firstName: authorData.firstName.trim(),
       lastName: authorData.lastName.trim(),
@@ -169,25 +170,16 @@ export const addNewAuthor = async (authorData: Omit<Author, 'id'>): Promise<Auth
         ? (authorData.birthDate instanceof Date 
           ? authorData.birthDate.toISOString().split('T')[0] 
           : new Date(authorData.birthDate).toISOString().split('T')[0])
-        : null
+        : null,
+      bookIds: bookIds
     };
 
-    // Log the exact payload being sent
-    console.log('Author Creation Payload:', JSON.stringify(postData, null, 2));
-
-    // Make API call with more detailed error handling
     const response = await axios.post(`${BASE_API_URL}/new`, postData, {
       headers: {
         'Content-Type': 'application/json'
       }
     });
 
-    // Validate response
-    if (!response.data || !response.data.id) {
-      throw new Error('No author data returned after creation or invalid ID');
-    }
-
-    // Return formatted author object
     return {
       id: Number(response.data.id),
       firstName: response.data.firstName,
@@ -195,17 +187,8 @@ export const addNewAuthor = async (authorData: Omit<Author, 'id'>): Promise<Auth
       birthDate: response.data.birthDate ? new Date(response.data.birthDate) : null,
       biography: response.data.biography
     };
-  } catch (error: unknown) {
-    // Detailed error logging
-    if (axios.isAxiosError(error)) {
-      console.error('Full Axios Error:', {
-        response: error.response?.data,
-        status: error.response?.status,
-        headers: error.response?.headers,
-        requestData: error.config?.data
-      });
-    }
-
+  } catch (error) {
+    console.error('Error adding new author:', error);
     throw error;
   }
 };

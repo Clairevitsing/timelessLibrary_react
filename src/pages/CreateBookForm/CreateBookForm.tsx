@@ -45,12 +45,13 @@ const bookSchema = Yup.object().shape({
     .min(1, 'At least one author is required')
 });
 
-const BookCreateForm = () => {
+const CreateBookForm = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [submitSuccess, setSubmitSuccess] = useState(false);
   const [categories, setCategories] = useState<Category[]>([]);
   const [isLoadingCategories, setIsLoadingCategories] = useState(false);
+  const [currentBookId, setCurrentBookId] = useState<number | null>(null);
 
   const {
     register,
@@ -101,16 +102,19 @@ const BookCreateForm = () => {
 
     try {
       // Find or create authors and get their IDs
+        // Find or create the author, passing the current book's ID
       const authorIds = await Promise.all(
         data.authors.map(async (author) => {
           return await findOrCreateAuthor(
-            author.firstName, 
-            author.lastName, 
-            author.biography, 
-            author.birthDate
+            author.firstName,
+            author.lastName,
+            author.biography,
+            author.birthDate,
+            currentBookId ? [currentBookId] : []
           );
         })
       );
+
 
       const selectedCategory = categories.find((cat) => cat.name === data.categoryName);
       if (!selectedCategory) throw new Error('Selected category not found');
@@ -333,4 +337,4 @@ const BookCreateForm = () => {
   );
 };
 
-export default BookCreateForm;
+export default CreateBookForm;
