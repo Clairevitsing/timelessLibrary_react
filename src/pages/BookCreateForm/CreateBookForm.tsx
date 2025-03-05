@@ -3,30 +3,13 @@ import { useForm, Controller } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import * as Yup from 'yup';
 import { useNavigate } from 'react-router-dom';
-import { NewBookData } from '../../models/Book';
-import { createNewBook } from '../../services/BookService';
+import { NewBookData, BookFormData } from '../../models/Book';
+import { Category } from '../../models/Category';
+import { createBook } from '../../services/BookService';
 import { fetchCategories } from '../../services/CategoryService';
-import styles from './BookCreateForm.module.css'; 
+import styles from './CreateBookForm.module.css';
 
-type Category = { id: number; name: string };
 
-type AuthorData = {
-  id?: number;
-  firstName: string;
-  lastName: string;
-};
-
-type BookFormData = {
-  title: string;
-  ISBN: string;
-  publishedYear: string;
-  description: string;
-  image: string;
-  available: boolean;
-  categoryName: string;
-  authors: AuthorData[];
-  authorIds: number[];
-};
 
 const bookSchema = Yup.object().shape({
   title: Yup.string().required('Title is required'),
@@ -106,7 +89,7 @@ const BookCreateForm = () => {
         authorIds: data.authors.map((author) => author.id!).filter((id) => id !== undefined),
       };
 
-      const newBook = await createNewBook(newBookData);
+      const newBook = await createBook(newBookData);
       setSubmitSuccess(true);
       reset();
       navigate(`/books/${newBook.id}`);
@@ -160,9 +143,12 @@ const BookCreateForm = () => {
         {watch('image') && <img src={watch('image')} alt="Preview" className={styles.previewImage} />}
       </div>
       <div className={styles.formGroup}>
-        <label>Availability</label>
-        <input type="checkbox" {...register('available')} />
-      </div>
+  <label>Availability</label>
+  <div className={styles.availabilityGroup}>
+    <input type="checkbox" {...register('available')} id="availableCheckbox" />
+    <label htmlFor="availableCheckbox">Available</label>
+  </div>
+</div>
       <div className={styles.formGroup}>
         <label>Category</label>
         {isLoadingCategories ? (
@@ -219,21 +205,25 @@ const BookCreateForm = () => {
                   )}
                 </div>
               ))}
-              <button
-                type="button"
-                className={styles.addAuthorButton}
-                onClick={() => field.onChange([...field.value, { firstName: '', lastName: '' }])}
-              >
-                Add Author
-              </button>
+             <div className={styles.buttonContainer}>
+    <button
+        type="button"
+        className={styles.addAuthorButton}
+        onClick={() => field.onChange([...field.value, { firstName: '', lastName: '' }])}
+    >
+        Add Author
+    </button>
+</div>
             </div>
           )}
         />
         {errors.authors && <p className={styles.errorMessage}>{errors.authors.message}</p>}
       </div>
-      <button type="submit" disabled={isSubmitting} className={styles.submitButton}>
-        {isSubmitting ? 'Creating...' : 'Create Book'}
-      </button>
+      <div className={styles.buttonContainer}>
+    <button type="submit" disabled={isSubmitting} className={styles.submitButton}>
+        {isSubmitting ? 'Updating...' : 'Update Book'}
+    </button>
+</div>
 
       {submitError && <p className={styles.errorMessage}>{submitError}</p>}
       {submitSuccess && <p className={styles.successMessage}>Book successfully created!</p>}

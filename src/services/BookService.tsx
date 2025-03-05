@@ -161,16 +161,52 @@ export const updateBookAvailability = async (id: number, available: boolean) => 
   }
 };
 
-export const createNewBook = async (bookData: NewBookData): Promise<Book> => {
-    try {
-        const response = await axios.post(`${BASE_API_URL}/new`, bookData);
-        const newBook: Book = response.data;
-        console.log('New book created:', newBook);
-        return newBook;
-    } catch (error) {
-        console.error('Failed to create book:', error);
-        throw new Error('Failed to create new book');
-    }
+// export const createNewBook = async (
+//   bookData: NewBookData,
+//   categories: { id: number; name: string }[]
+// ): Promise<Book> => {
+//   try {
+//     // Find the category by name
+//     const selectedCategory = categories.find((cat: { name: string }) => cat.name === bookData.categoryName);
+
+//     if (!selectedCategory) {
+//       throw new Error(`Category with name "${bookData.categoryName}" not found`);
+//     }
+
+//     // Format the publishedYear if it's a Date object
+//     const formattedPublishedYear =
+//       typeof bookData.publishedYear === 'string'
+//         ? bookData.publishedYear.split('T')[0]
+//         : bookData.publishedYear.toISOString().split('T')[0];
+
+//     // Prepare the payload for book creation
+//     const payload = {
+//       title: bookData.title,
+//       ISBN: bookData.ISBN,
+//       publishedYear: formattedPublishedYear,
+//       description: bookData.description,
+//       image: bookData.image,
+//       available: bookData.available,
+//       categoryId: selectedCategory.id,
+//       authors: bookData.authors, // Include authors data
+//     };
+
+//     // Send the request to create the book
+//     const response = await axios.post(`${BASE_API_URL}/new`, payload);
+//     return response.data;
+//   } catch (error) {
+//     console.error('Error creating book:', error);
+//     throw error;
+//   }
+// };
+export const createBook = async (bookData: NewBookData) => {
+  try {
+    const response = await axios.post(`${BASE_API_URL}/new`, bookData);
+    return response.data;
+  } catch (error) {
+    console.error('Book creation failed', error);
+    throw error;
+  }
 };
 
 export const fetchRandomBookFromList = async (): Promise<Book> => {
@@ -286,3 +322,4 @@ export const fetchBooksByCategory = async (categoryId: number): Promise<Book[]> 
     throw error;
   }
 };
+

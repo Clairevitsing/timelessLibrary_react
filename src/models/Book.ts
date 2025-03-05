@@ -9,53 +9,40 @@ export type Book = {
   description: string;
   image: string;
   available: boolean;
-  authors: Author[]; 
+  authors: Author[];
   category?: Category;  
 }
 
-export type NewBookData = {
-    title: string;
-  ISBN: string;
-    // Peut être une Date en mémoire ou une string lors de l'envoi à l'API
-    publishedYear: string | Date;  
-    description: string;
-    image: string;
-    available: boolean;
-    authorIds: number[];  
-    categoryId: number;
-}
-
-// // Define specific type for the form that matches the Yup schema
-// export type BookFormData = {
-//   title: string;
-//   ISBN: string;
-//   publishedYear: string;
-//   description: string;
-//   image: string;
-//   available: boolean;
-//   categoryId: number;
-//   authorIds: number[];
-// };
-
-// Type pour les données du formulaire
-export type BookFormData = {
+export interface BookFormData {
   title: string;
   ISBN: string;
   publishedYear: string;
   description: string;
   image: string;
   available: boolean;
-  categoryName: string; 
-  authorIds: number[];
-};
+  categoryName: string;
+  authors: Author[];
+  authorIds?: number[];
+}
 
-// // Fonction utilitaire pour convertir une date en format YYYY-MM-DD pour l'API
+export interface NewBookData extends Omit<BookFormData, 'authors' | 'categoryName'> {
+  categoryId: number;
+  authorIds?: number[];
+}
+
+/**
+ * Formats a date for API compatibility
+ * @param date - Date to be formatted (Date object, string, or undefined)
+ * @returns Formatted date string in YYYY-MM-DD format or undefined
+ */
 export function formatDateForApi(date: Date | string | undefined): string | undefined {
     if (!date) return undefined;
-    
+   
     if (date instanceof Date) {
         return date.toISOString().split('T')[0];
     }
-     // Déjà sous forme de string
-    return date; 
+     
+    // If already a string, return as is (assuming it's already in correct format)
+    return date;
 }
+

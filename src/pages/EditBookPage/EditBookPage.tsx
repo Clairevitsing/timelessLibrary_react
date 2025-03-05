@@ -2,19 +2,17 @@ import React, { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import * as Yup from 'yup';
-import { Book, NewBookData, BookFormData } from '../../models/Book';
+import { Book, NewBookData, BookFormData, formatDateForApi } from '../../models/Book';
 import { fetchBookDetails, updateBook } from '../../services/BookService';
 import { fetchCategories } from '../../services/CategoryService';
 import { useNavigate, useParams } from 'react-router-dom';
 import { Category } from '../../models/Category';
 import { Author } from '../../models/Author';
 import AuthorEditor from '../../components/AuthorEditor/AuthorEditor';
-import { addNewAuthor, fetchAuthors,updateAuthor } from '../../services/AuthorService';
+import { addNewAuthor, fetchAuthors, updateAuthor } from '../../services/AuthorService';
 import './EditBookPage.css';
 
-
-
-// Schéma de validation
+// Validation schema
 const bookSchema = Yup.object().shape({
   title: Yup.string().required('Title is required'),
   ISBN: Yup.string().required('ISBN is required'),
@@ -29,27 +27,10 @@ const bookSchema = Yup.object().shape({
     .required('At least one author is required')
 });
 
-// Fonction pour supprimer un auteur
-export const deleteAuthor = async (authorId: number): Promise<boolean> => {
-  try {
-    const response = await fetch(`/api/authors/${authorId}`, {
-      method: 'DELETE',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-    });
-
-    if (!response.ok) {
-      const errorData = await response.json();
-      throw new Error(errorData.message || 'Failed to delete author');
-    }
-
-    return true;
-  } catch (error) {
-    console.error('Error deleting author:', error);
-    throw error;
-  }
-};
+// Custom type to resolve typing issues
+interface EditBookFormData extends Omit<BookFormData, 'authors'> {
+  authorIds: number[];
+}
 
 const EditBookPage = () => {
   const { bookId } = useParams<{ bookId: string }>();
@@ -64,7 +45,13 @@ const EditBookPage = () => {
   const [currentAuthor, setCurrentAuthor] = useState<Author | null>(null);
   const [bookAuthors, setBookAuthors] = useState<Author[]>([]);
   
-  const { register, handleSubmit, setValue, watch, formState: { errors } } = useForm<BookFormData>({
+  const { 
+    register, 
+    handleSubmit, 
+    setValue, 
+    watch, 
+    formState: { errors } 
+  } = useForm<EditBookFormData>({
     resolver: yupResolver(bookSchema),
     defaultValues: {
       title: '',
@@ -79,9 +66,30 @@ const EditBookPage = () => {
   });
 
   const navigate = useNavigate();
-  const watchAuthorIds = watch('authorIds');
 
-  // Chargement des catégories et auteurs
+  // Delete author function
+  const deleteAuthor = async (authorId: number): Promise<boolean> => {
+    try {
+      const response = await fetch(`/api/authors/${authorId}`, {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Failed to delete author');
+      }
+
+      return true;
+    } catch (error) {
+      console.error('Error deleting author:', error);
+      throw error;
+    }
+  };
+
+  // Load categories and authors
   useEffect(() => {
     const loadInitialData = async () => {
       try {
@@ -104,7 +112,7 @@ const EditBookPage = () => {
     loadInitialData();
   }, []);
 
-  // Chargement des détails du livre
+  // Load book details
   useEffect(() => {
     const fetchBook = async () => {
       if (!bookId) return;
@@ -145,47 +153,50 @@ const EditBookPage = () => {
     fetchBook();
   }, [bookId, setValue]);
 
-  // Gestion de la sauvegarde d'un auteur
+  // Save author handler
   const handleSaveAuthor = async (authorData: Omit<Author, 'id'>): Promise<Author> => {
     try {
-    // If currentAuthor exists and has a valid ID, we're editing an existing author
-    if (currentAuthor && currentAuthor.id) {
-      console.log('Updating existing author:', currentAuthor.id, authorData);
-      
-      try {
+      // If currentAuthor exists and has a valid ID, we're editing an existing author
+      if (currentAuthor && currentAuthor.id) {
         const updatedAuthor = await updateAuthor(currentAuthor.id, authorData);
-        console.log('Author updated successfully:', updatedAuthor);
         
-        // Rest of your code...
+        // Update authors list and book authors if needed
+        setAuthors(prevAuthors => 
+          prevAuthors.map(author => 
+            author.id === currentAuthor.id ? {...updatedAuthor} : author
+          )
+        );
         
-        return updatedAuthor;
-      } catch (updateError) {
-        console.error('Specific error updating author:', updateError);
-        throw updateError;
-      }
-    } else {
-      console.log('Creating new author:', authorData);
-      const savedAuthor = await addNewAuthor(authorData);
-      console.log('Author created successfully:', savedAuthor);
-      
-      // Rest of your code...
-      
-      return savedAuthor;
-    }
-  } catch (error) {
-    console.error('Error in handleSaveAuthor:', error);
-    throw new Error('Failed to save author');
-  }
-};
+        setBookAuthors(prevBookAuthors => 
+          prevBookAuthors.map(author => 
+            author.id === currentAuthor.id ? {...updatedAuthor} : author
+          )
+        );
 
-  // Gestion de l'édition d'un auteur
+        return updatedAuthor;
+      } else {
+        // Creating a new author
+        const savedAuthor = await addNewAuthor(authorData);
+        
+        // Add new author to authors list
+        setAuthors(prevAuthors => [...prevAuthors, savedAuthor]);
+        
+        return savedAuthor;
+      }
+    } catch (error) {
+      console.error('Error in handleSaveAuthor:', error);
+      throw new Error('Failed to save author');
+    }
+  };
+
+  // Edit author handler
   const handleEditAuthor = (author: Author) => {
     setCurrentAuthor(author);
     setShowAuthorForm(true);
   };
 
-  // Gestion de la soumission du formulaire
-  const onSubmit = async (data: BookFormData) => {
+  // Book submission handler
+  const onSubmit = async (data: EditBookFormData) => {
     if (!bookId) return;
     
     setIsSubmitting(true);
@@ -201,7 +212,7 @@ const EditBookPage = () => {
       const updatedBookData: Partial<NewBookData> = {
         title: data.title,
         ISBN: data.ISBN,
-        publishedYear: new Date(data.publishedYear),
+        publishedYear: formatDateForApi(data.publishedYear) || '', 
         description: data.description,
         image: data.image,
         available: data.available,
@@ -210,7 +221,7 @@ const EditBookPage = () => {
       };
       
       const updatedBook = await updateBook(parseInt(bookId, 10), updatedBookData);
-      console.log('Book updated:', updatedBook);
+      
       setSubmitSuccess(true);
       
       setTimeout(() => {
@@ -224,7 +235,7 @@ const EditBookPage = () => {
     }
   };
 
-  // Affichage des auteurs du livre
+  // Render book authors
   const renderBookAuthors = () => {
     if (bookAuthors.length === 0) {
       return (
@@ -260,15 +271,13 @@ const EditBookPage = () => {
     );
   };
 
-  // Création d'un auteur vide
-  const createEmptyAuthor = (): Author => {
-    return {
-      id: 0,
-      firstName: '',
-      lastName: '',
-      biography: ''
-    };
-  };
+  // Create empty author
+  const createEmptyAuthor = (): Author => ({
+    id: 0,
+    firstName: '',
+    lastName: '',
+    biography: ''
+  });
 
   if (isLoading) {
     return <div className="loading-message">Loading book details...</div>;

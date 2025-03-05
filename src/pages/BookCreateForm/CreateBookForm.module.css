@@ -15,6 +15,8 @@
 
 .formGroup {
     margin-bottom: 15px;
+    align-items: center;
+    gap: 8px;
 }
 
 .formGroup label {
@@ -35,6 +37,24 @@
 .formGroup textarea {
     resize: vertical;
     min-height: 100px;
+}
+
+/* New styles for availability checkbox */
+.availabilityGroup {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.availabilityGroup label {
+    display: inline-block;
+    margin-bottom: 0;
+    margin-left: 5px;
+}
+
+.availabilityGroup input[type="checkbox"] {
+    width: auto;
+    margin: 0;
 }
 
 .errorMessage {
@@ -97,4 +117,10 @@
     color: green;
     font-weight: bold;
     margin-top: 10px;
+}
+
+.buttonContainer {
+    display: flex;
+    justify-content: center;
+    margin-top: 20px;
 }

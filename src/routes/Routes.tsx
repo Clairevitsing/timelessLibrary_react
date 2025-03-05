@@ -8,7 +8,7 @@ import LoginPage from "../pages/LoginPage/LoginPage";
 import RegisterPage from "../pages/RegisterPage/RegisterPage";
 import CategoryPage from "../pages/CategoryPage/CategoriesPage";
 import BookDetail from "../components/BookDetail/BookDetail";
-import BookCreateForm from "../pages/BookCreateForm/BookCreateForm";
+import CreateBookForm from "../pages/BookCreateForm/CreateBookForm";
 import EditBookPage from "../pages/EditBookPage/EditBookPage";
 import Cart from "../components/Cart/Cart";
 import LoanDetails from "../components/Loan/LoanDetails";
@@ -34,7 +34,7 @@ export const router = createBrowserRouter([
             { path: "loanDetails", element: <LoanDetails /> }, 
             { path: "books/:id", element: <BookDetail /> },
             { path: "books/:bookId/edit", element: <EditBookPage /> },
-            { path: "books/new", element: <BookCreateForm /> },
+            { path: "books/new", element: <CreateBookForm /> },
             { path: "categories", element: <CategoryPage /> },
             { path: "categories/:categoryId/books", element: <CategoryBooks /> },
             { path: "categories/new", element: <CreateCategoryForm /> },
