@@ -2,15 +2,21 @@ import React, { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import * as Yup from 'yup';
-import { Book, NewBookData, BookFormData, formatDateForApi } from '../../models/Book';
-import { fetchBookDetails, updateBook } from '../../services/BookService';
-import { fetchCategories } from '../../services/CategoryService';
 import { useNavigate, useParams } from 'react-router-dom';
+import { Book, NewBookData, BookFormData, formatDateForApi } from '../../models/Book';
 import { Category } from '../../models/Category';
 import { Author } from '../../models/Author';
+import { fetchBookDetails, updateBook } from '../../services/BookService';
+import { fetchCategories } from '../../services/CategoryService';
+import { 
+  fetchAuthors, 
+  updateAuthor, 
+  findOrCreateAuthor, 
+  fetchAuthorById,
+  deleteAuthor as deleteAuthorService 
+} from '../../services/AuthorService';
 import AuthorEditor from '../../components/AuthorEditor/AuthorEditor';
-import { addNewAuthor, fetchAuthors, updateAuthor } from '../../services/AuthorService';
-import './EditBookPage.css';
+import styles from './EditBookPage.module.css';
 
 // Validation schema
 const bookSchema = Yup.object().shape({
@@ -32,19 +38,23 @@ interface EditBookFormData extends Omit<BookFormData, 'authors'> {
   authorIds: number[];
 }
 
-const EditBookPage = () => {
+const EditBookPage: React.FC = () => {
   const { bookId } = useParams<{ bookId: string }>();
+  const navigate = useNavigate();
+
   const [isLoading, setIsLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [submitSuccess, setSubmitSuccess] = useState(false);
+
   const [book, setBook] = useState<Book | null>(null);
   const [categories, setCategories] = useState<Category[]>([]);
   const [authors, setAuthors] = useState<Author[]>([]);
+  const [bookAuthors, setBookAuthors] = useState<Author[]>([]);
+
   const [showAuthorForm, setShowAuthorForm] = useState(false);
   const [currentAuthor, setCurrentAuthor] = useState<Author | null>(null);
-  const [bookAuthors, setBookAuthors] = useState<Author[]>([]);
-  
+
   const { 
     register, 
     handleSubmit, 
@@ -65,74 +75,86 @@ const EditBookPage = () => {
     }
   });
 
-  const navigate = useNavigate();
+   // Edit author handler
+  const handleEditAuthor = (author: Author) => {
+    setCurrentAuthor(author);
+    setShowAuthorForm(true);
+  };
 
-  // Delete author function
-  const deleteAuthor = async (authorId: number): Promise<boolean> => {
+  const handleDeleteAuthor = async (authorId: number): Promise<void> => {
+    if (bookAuthors.length <= 1) {
+      setSubmitError('Cannot remove the last author');
+      return;
+    }
+
     try {
-      const response = await fetch(`/api/authors/${authorId}`, {
-        method: 'DELETE',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || 'Failed to delete author');
-      }
-
-      return true;
+      await deleteAuthorService(authorId);
+      setBookAuthors(prev => prev.filter(author => author.id !== authorId));
+      const currentAuthorIds = watch('authorIds');
+      setValue('authorIds', currentAuthorIds.filter(id => id !== authorId));
     } catch (error) {
-      console.error('Error deleting author:', error);
-      throw error;
+      setSubmitError('Failed to delete author');
     }
   };
 
-  // Load categories and authors
+  const handleSaveAuthor = async (authorData: Omit<Author, 'id'>): Promise<Author> => {
+    try {
+      if (currentAuthor?.id) {
+        const updatedAuthor = await updateAuthor(currentAuthor.id, authorData);
+        setAuthors(prev => prev.map(author => author.id === currentAuthor.id ? updatedAuthor : author));
+        setBookAuthors(prev => prev.map(author => author.id === currentAuthor.id ? updatedAuthor : author));
+        return updatedAuthor;
+      }
+
+      const authorId = await findOrCreateAuthor(authorData.firstName, authorData.lastName, authorData.biography || '', authorData.birthDate?.toISOString().split('T')[0] || '', bookId ? [parseInt(bookId, 10)] : []);
+      const savedAuthor = await fetchAuthorById(authorId);
+
+      setAuthors(prev => [...prev, savedAuthor].filter((v, i, a) => a.findIndex(t => (t.id === v.id)) === i));
+      setBookAuthors(prev => [...prev, savedAuthor].filter((v, i, a) => a.findIndex(t => (t.id === v.id)) === i));
+
+      const currentAuthorIds = watch('authorIds');
+      if (!currentAuthorIds.includes(savedAuthor.id)) {
+        setValue('authorIds', [...currentAuthorIds, savedAuthor.id]);
+      }
+      return savedAuthor;
+    } catch (error) {
+      setSubmitError('Failed to save author');
+      throw new Error('Failed to save author');
+    }
+  };
+
   useEffect(() => {
     const loadInitialData = async () => {
       try {
         setIsLoading(true);
-        const [categoriesData, authorsData] = await Promise.all([
-          fetchCategories(),
-          fetchAuthors()
-        ]);
-        
+        const [categoriesData, authorsData] = await Promise.all([fetchCategories(), fetchAuthors()]);
         setCategories(categoriesData);
         setAuthors(authorsData);
       } catch (error) {
-        console.error('Error loading initial data:', error);
         setSubmitError('Unable to load categories or authors. Please try again.');
       } finally {
         setIsLoading(false);
       }
     };
-    
+
     loadInitialData();
   }, []);
 
-  // Load book details
   useEffect(() => {
     const fetchBook = async () => {
       if (!bookId) return;
-      
+
       try {
         setIsLoading(true);
         const bookData = await fetchBookDetails(parseInt(bookId, 10));
         setBook(bookData);
-        
+
         if (bookData.authors) {
           setBookAuthors(bookData.authors);
         }
-        
-        const formattedDate = bookData.publishedYear 
-          ? bookData.publishedYear.toISOString().split('T')[0]
-          : '';
 
-        const authorIds = bookData.authors 
-          ? bookData.authors.map(author => author.id) 
-          : [];
+        const formattedDate = bookData.publishedYear ? bookData.publishedYear.toISOString().split('T')[0] : '';
+        const authorIds = bookData.authors ? bookData.authors.map(author => author.id) : [];
 
         setValue('title', bookData.title);
         setValue('ISBN', bookData.ISBN);
@@ -143,7 +165,6 @@ const EditBookPage = () => {
         setValue('categoryName', bookData.category?.name || '');
         setValue('authorIds', authorIds);
       } catch (error) {
-        console.error('Error loading book details:', error);
         setSubmitError('Unable to load book details. Please try again.');
       } finally {
         setIsLoading(false);
@@ -153,52 +174,9 @@ const EditBookPage = () => {
     fetchBook();
   }, [bookId, setValue]);
 
-  // Save author handler
-  const handleSaveAuthor = async (authorData: Omit<Author, 'id'>): Promise<Author> => {
-    try {
-      // If currentAuthor exists and has a valid ID, we're editing an existing author
-      if (currentAuthor && currentAuthor.id) {
-        const updatedAuthor = await updateAuthor(currentAuthor.id, authorData);
-        
-        // Update authors list and book authors if needed
-        setAuthors(prevAuthors => 
-          prevAuthors.map(author => 
-            author.id === currentAuthor.id ? {...updatedAuthor} : author
-          )
-        );
-        
-        setBookAuthors(prevBookAuthors => 
-          prevBookAuthors.map(author => 
-            author.id === currentAuthor.id ? {...updatedAuthor} : author
-          )
-        );
-
-        return updatedAuthor;
-      } else {
-        // Creating a new author
-        const savedAuthor = await addNewAuthor(authorData);
-        
-        // Add new author to authors list
-        setAuthors(prevAuthors => [...prevAuthors, savedAuthor]);
-        
-        return savedAuthor;
-      }
-    } catch (error) {
-      console.error('Error in handleSaveAuthor:', error);
-      throw new Error('Failed to save author');
-    }
-  };
-
-  // Edit author handler
-  const handleEditAuthor = (author: Author) => {
-    setCurrentAuthor(author);
-    setShowAuthorForm(true);
-  };
-
-  // Book submission handler
   const onSubmit = async (data: EditBookFormData) => {
     if (!bookId) return;
-    
+
     setIsSubmitting(true);
     setSubmitError(null);
     setSubmitSuccess(false);
@@ -209,228 +187,183 @@ const EditBookPage = () => {
         throw new Error('Invalid category');
       }
 
+      const finalAuthorIds = await Promise.all(
+        data.authorIds.map(async (authorId) => {
+          try {
+            await fetchAuthorById(authorId);
+            return authorId;
+          } catch {
+            const existingAuthor = bookAuthors.find(a => a.id === authorId);
+            if (existingAuthor) {
+              return await findOrCreateAuthor(existingAuthor.firstName, existingAuthor.lastName, existingAuthor.biography || '', existingAuthor.birthDate?.toISOString().split('T')[0] || '');
+            }
+            throw new Error(`Invalid author ID: ${authorId}`);
+          }
+        })
+      );
+
       const updatedBookData: Partial<NewBookData> = {
         title: data.title,
         ISBN: data.ISBN,
-        publishedYear: formatDateForApi(data.publishedYear) || '', 
+        publishedYear: formatDateForApi(data.publishedYear) || '',
         description: data.description,
         image: data.image,
         available: data.available,
-        categoryId: selectedCategory.id, 
-        authorIds: data.authorIds,
+        categoryId: selectedCategory.id,
+        authorIds: finalAuthorIds,
       };
-      
+
       const updatedBook = await updateBook(parseInt(bookId, 10), updatedBookData);
-      
       setSubmitSuccess(true);
-      
+
       setTimeout(() => {
         navigate(`/books/${updatedBook.id}`);
       }, 1500);
     } catch (error) {
-      console.error('Error updating book:', error);
       setSubmitError('Failed to update book. Please try again.');
     } finally {
       setIsSubmitting(false);
     }
   };
 
-  // Render book authors
   const renderBookAuthors = () => {
     if (bookAuthors.length === 0) {
-      return (
-        <div className="no-authors">No authors associated with this book</div>
-      );
+      return <div className={styles.noAuthors}>No authors associated with this book</div>;
     }
-    
-    return (
-      <div className="book-authors">
-        <h4 className="authors-title">Book Authors:</h4>
-        <div className="authors-list">
-          {bookAuthors.map(author => (
-            <div key={author.id} className="author-card">
-              <div className="author-info">
-                <div className="author-name">{author.firstName} {author.lastName}</div>
-                {author.biography && (
-                  <div className="author-bio">{author.biography.substring(0, 50)}...</div>
-                )}
-              </div>
-              <div className="author-actions">
-                <button
-                  type="button"
-                  onClick={() => handleEditAuthor(author)}
-                  className="btn-edit-author"
-                >
-                  Edit
-                </button>
-              </div>
+   
+      return (
+    <div className={styles.bookAuthors}>
+      <h4 className={styles.authorsTitle}>Book Authors:</h4>
+      <div className={styles.authorsList}>
+        {bookAuthors.map(author => (
+          <div key={author.id} className={styles.authorCard}>
+            <div className={styles.authorInfo}>
+              <div className={styles.authorName}>{author.firstName} {author.lastName}</div>
+              {author.biography && (
+                <div className={styles.authorBio}>{author.biography.substring(0, 50)}...</div>
+              )}
             </div>
-          ))}
-        </div>
+            <div className={styles.authorActions}>
+              <button
+                type="button"
+                onClick={() => handleEditAuthor(author)}
+                className={styles.btnEditAuthor}
+              >
+                Edit
+              </button>
+              <button
+                type="button"
+                onClick={() => handleDeleteAuthor(author.id)}
+                className={styles.btnDeleteAuthor}
+              >
+                Delete
+              </button>
+            </div>
+          </div>
+        ))}
       </div>
+    </div>
     );
   };
-
-  // Create empty author
-  const createEmptyAuthor = (): Author => ({
-    id: 0,
-    firstName: '',
-    lastName: '',
-    biography: '',
-    birthDate: null
-  });
-
-  if (isLoading) {
-    return <div className="loading-message">Loading book details...</div>;
-  }
+  
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="edit-book-form">
-      <h2 className="page-title">Edit Book: {book?.title}</h2>
-      
-      <div className="form-group">
-        <label className="form-label">Title</label>
-        <input 
-          {...register('title')} 
-          placeholder="Title" 
-          className="form-input"
-        />
-        {errors.title && <p className="error-message">{errors.title.message}</p>}
+    <form onSubmit={handleSubmit(onSubmit)} className={styles.editBookForm}>
+      <h2 className={styles.pageTitle}>Edit Book: {book?.title}</h2>
+      {/* Form Fields */}
+      <div className={`form-group ${styles.formGroup}`}>
+        <label className={styles.formLabel}>Title</label>
+        <input {...register('title')} placeholder="Title" className={`form-control ${styles.formInput}`} />
+        {errors.title && <p className={styles.errorMessage}>{errors.title.message}</p>}
       </div>
-      
-      <div className="form-group">
-        <label className="form-label">ISBN</label>
-        <input 
-          {...register('ISBN')} 
-          placeholder="ISBN" 
-          className="form-input"
-        />
-        {errors.ISBN && <p className="error-message">{errors.ISBN.message}</p>}
+      <div className={`form-group ${styles.formGroup}`}>
+        <label className={styles.formLabel}>ISBN</label>
+        <input {...register('ISBN')} placeholder="ISBN" className={`form-control ${styles.formInput}`} />
+        {errors.ISBN && <p className={styles.errorMessage}>{errors.ISBN.message}</p>}
       </div>
-      
-      <div className="form-group">
-        <label className="form-label">Publication Year</label>
-        <input 
-          type="date" 
-          {...register('publishedYear')} 
-          className="form-input"
-        />
-        {errors.publishedYear && <p className="error-message">{errors.publishedYear.message}</p>}
+      <div className={`form-group ${styles.formGroup}`}>
+        <label className={styles.formLabel}>Publication Year</label>
+        <input type="date" {...register('publishedYear')} className={`form-control ${styles.formInput}`} />
+        {errors.publishedYear && <p className={styles.errorMessage}>{errors.publishedYear.message}</p>}
       </div>
-      
-      <div className="form-group">
-        <label className="form-label">Description</label>
-        <textarea 
-          {...register('description')} 
-          placeholder="Description" 
-          className="form-textarea"
-        />
-        {errors.description && <p className="error-message">{errors.description.message}</p>}
+      <div className={`form-group ${styles.formGroup}`}>
+        <label className={styles.formLabel}>Description</label>
+        <textarea {...register('description')} placeholder="Description" className={`form-control ${styles.formTextarea}`} />
+        {errors.description && <p className={styles.errorMessage}>{errors.description.message}</p>}
       </div>
-      
-      <div className="form-group">
-        <label className="form-label">Image</label>
+      <div className={styles.formGroup}>
+        <label>Image</label>
         <input
           type="file"
           accept="image/*"
-          className="form-input-file"
-          onChange={e => {
-            const file = e.target.files ? e.target.files[0] : null;
+          onChange={(e) => {
+            const file = e.target.files?.[0];
             if (file) {
               const reader = new FileReader();
-              reader.onloadend = () => {
-                setValue('image', reader.result as string);
+              reader.onload = () => {
+                if (reader.result) setValue('image', reader.result.toString());
               };
-              reader.onerror = () => {
-                console.error('Error reading file.');
-                setSubmitError('An error occurred while reading the file.');
-              };
+              reader.onerror = () => setSubmitError('An error occurred while reading the file.');
               reader.readAsDataURL(file);
             }
           }}
         />
-        {errors.image && <p className="error-message">{errors.image.message}</p>}
-        {watch('image') && (
-          <img src={watch('image')} alt="Preview" className="image-preview" />
-        )}
+        {errors.image && <p className={styles.errorMessage}>{errors.image.message}</p>}
+        {watch('image') && <img src={watch('image')} alt="Preview" className={styles.previewImage} />}
       </div>
-      
-      <div className="form-group checkbox-group">
-        <label className="checkbox-label">
-          <input 
-            type="checkbox" 
+            <div className={`form-group ${styles.formGroup}`}>
+        <label className={styles.formLabel}>Availability</label>
+        <div className="form-check">
+          <input
+            type="checkbox"
             {...register('available')}
-            className="form-checkbox"
+            className={`form-check-input ${styles.formCheckbox}`}
+            id="availableCheckbox"
           />
-          <span>Available</span>
-        </label>
+          <label htmlFor="availableCheckbox">Available</label>
+        </div>
+        {errors.available && <p className={styles.errorMessage}>{errors.available.message}</p>}
       </div>
-      
-      <div className="form-group">
-        <label className="form-label">Category</label>
-        <select 
-          {...register('categoryName')}
-          className="form-select"
-        >
-          <option value="">Select a category</option>
-          {categories.map(category => (
+
+      <div className={`form-group ${styles.formGroup}`}>
+        <label className={styles.formLabel}>Category</label>
+        <select {...register('categoryName')} className={`form-control ${styles.formSelect}`}>
+          {categories.map((category) => (
             <option key={category.id} value={category.name}>
               {category.name}
             </option>
           ))}
         </select>
-        {errors.categoryName && <p className="error-message">{errors.categoryName.message}</p>}
+        {errors.categoryName && <p className={styles.errorMessage}>{errors.categoryName.message}</p>}
       </div>
-      
-      <div className="authors-section">
-        <h3 className="section-title">Authors</h3>
-        
-        {/* Affichage des auteurs du livre */}
-        {renderBookAuthors()}
-        
-        {/* Formulaire d'ajout/édition d'auteur */}
-        {showAuthorForm ? (
-          <div className="author-form-container">
-            <h4 className="form-subtitle">
-              {currentAuthor ? 'Edit Author' : 'Add Author'}
-            </h4>
-            <AuthorEditor
-              initialAuthor={currentAuthor || createEmptyAuthor()}
-              onSaveAuthor={handleSaveAuthor}
-              onCancel={() => {
-                setShowAuthorForm(false);
-                setCurrentAuthor(null);
-              }}
-            />
-          </div>
-        ) : (
-          <div className="add-author-container">
-            <button
-              type="button"
-              className="btn-add-author"
-              onClick={() => {
-                setCurrentAuthor(null);
-                setShowAuthorForm(true);
-              }}
-            >
-              + Add New Author
-            </button>
-          </div>
-        )}
-        
-        {errors.authorIds && <p className="error-message">{errors.authorIds.message}</p>}
-      </div>
-      
-      <button 
-        type="submit" 
-        disabled={isSubmitting}
-        className={`btn-submit ${isSubmitting ? 'btn-submitting' : ''}`}
-      >
-        {isSubmitting ? 'Updating...' : 'Update Book'}
-      </button>
 
-      {submitError && <p className="error-notification">{submitError}</p>}
-      {submitSuccess && <p className="success-notification">Book updated successfully!</p>}
+      <div className={`form-group ${styles.formGroup}`}>
+        <label className={styles.formLabel}>Authors</label>
+        {renderBookAuthors()}
+        <button
+          type="button"
+          onClick={() => setShowAuthorForm(true)}
+          className={`btn btn-primary ${styles.btnAddAuthor}`}
+        >
+          Add Author
+        </button>
+      </div>
+
+      {showAuthorForm && (
+        <AuthorEditor
+            initialAuthor={currentAuthor} 
+            onSaveAuthor={handleSaveAuthor} 
+            onCancel={() => setShowAuthorForm(false)} 
+          />
+      )}
+
+      <div className={styles.formActions}>
+        <button type="submit" disabled={isSubmitting} className={`btn btn-primary ${styles.btnSubmit}`}>
+          {isSubmitting ? 'Saving...' : 'Save Changes'}
+        </button>
+        {submitError && <div className={styles.errorMessage}>{submitError}</div>}
+        {submitSuccess && <div className={styles.successMessage}>Book updated successfully!</div>}
+      </div>
     </form>
   );
 };

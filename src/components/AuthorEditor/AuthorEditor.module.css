@@ -1,0 +1,40 @@
+.authorEditor {
+    background-color: #f9fafb;
+    border-radius: 8px;
+    padding: 20px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    max-width: 500px;
+    margin: 0 auto;
+}
+
+.inputField {
+    width: 100%;
+    padding: 12px 16px;
+    border-radius: 8px;
+    border: 1px solid #d1d5db;
+    background-color: #ffffff;
+    font-size: 1rem;
+    margin-top: 0.25rem;
+}
+
+.inputField:focus {
+    border-color: #3498db;
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.2);
+}
+
+.btnCancel {
+    background-color: #f3f4f6;
+    border: 1px solid #e5e7eb;
+    color: #4b5563;
+}
+
+.btnSubmit {
+    background-color: #3b82f6;
+    border: none;
+    color: white;
+}
+
+.textRed {
+    color: #ef4444;
+}

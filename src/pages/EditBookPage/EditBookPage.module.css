@@ -1,0 +1,199 @@
+.editBookForm {
+    max-width: 800px;
+    margin: 2rem auto;
+    padding: 2rem;
+    background-color: #ffffff;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.pageTitle {
+    font-size: 2rem;
+    font-weight: 600;
+    color: #2c3e50;
+    margin-bottom: 1.5rem;
+    text-align: center;
+}
+
+.formGroup {
+    margin-bottom: 1.5rem;
+}
+.formCheckbox {
+    margin-right: 10px;
+}
+.formLabel {
+    display: block;
+    font-size: 1rem;
+    font-weight: 500;
+    color: #34495e;
+    margin-bottom: 0.5rem;
+}
+
+.formInput,
+.formSelect,
+.formTextarea {
+    width: 100%;
+    padding: 0.75rem;
+    font-size: 1rem;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    background-color: #f9f9f9;
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.formInput:focus,
+.formSelect:focus,
+.formTextarea:focus {
+    border-color: #3498db;
+    box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.2);
+    outline: none;
+}
+
+.formTextarea {
+    resize: vertical;
+    min-height: 120px;
+}
+
+.formCheckbox {
+    margin-left: 0.5rem;
+    width: 1.25rem;
+    height: 1.25rem;
+    cursor: pointer;
+}
+
+.errorMessage {
+    color: #e74c3c;
+    font-size: 0.875rem;
+    margin-top: 0.5rem;
+}
+
+.successMessage {
+    color: #27ae60;
+    font-size: 0.875rem;
+    margin-top: 0.5rem;
+}
+
+.bookAuthors {
+    margin-top: 1.5rem;
+}
+
+.authorsTitle {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: #2c3e50;
+    margin-bottom: 1rem;
+}
+
+.authorsList {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.authorCard {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem;
+    background-color: #f9f9f9;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    transition: box-shadow 0.3s ease;
+}
+
+.authorCard:hover {
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.authorInfo {
+    flex: 1;
+}
+
+.authorName {
+    font-size: 1rem;
+    font-weight: 500;
+    color: #34495e;
+}
+
+.authorBio {
+    font-size: 0.875rem;
+    color: #7f8c8d;
+    margin-top: 0.25rem;
+}
+
+.authorActions {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.btnEditAuthor,
+.btnDeleteAuthor,
+.btnAddAuthor,
+.btnSubmit {
+    padding: 0.5rem 1rem;
+    font-size: 0.875rem;
+    font-weight: 500;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.btnEditAuthor {
+    background-color: #3498db;
+    color: white;
+}
+
+.btnEditAuthor:hover {
+    background-color: #2980b9;
+}
+
+.btnDeleteAuthor {
+    background-color: #e74c3c;
+    color: white;
+}
+
+.btnDeleteAuthor:hover {
+    background-color: #c0392b;
+}
+
+.btnAddAuthor {
+    background-color: #2ecc71;
+    color: white;
+    margin-top: 1rem;
+}
+
+.btnAddAuthor:hover {
+    background-color: #27ae60;
+}
+
+.btnSubmit {
+    background-color: #3498db;
+    color: white;
+    width: 100%;
+    padding: 0.75rem;
+    font-size: 1rem;
+}
+
+.btnSubmit:disabled {
+    background-color: #bdc3c7;
+    cursor: not-allowed;
+}
+
+.btnSubmit:hover:not(:disabled) {
+    background-color: #2980b9;
+}
+
+.formActions {
+    margin-top: 2rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.noAuthors {
+    font-size: 0.875rem;
+    color: #7f8c8d;
+    text-align: center;
+    margin-top: 1rem;
+}

@@ -192,3 +192,17 @@ export const addNewAuthor = async (
     throw error;
   }
 };
+
+
+export const deleteAuthor = async (id: number): Promise<void> => {
+  const response = await fetch(`${BASE_API_URL}/${id}`, {
+    method: 'DELETE',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+  });
+
+  if (!response.ok) {
+    throw new Error('Failed to delete author');
+  }
+};
