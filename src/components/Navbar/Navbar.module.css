@@ -1,0 +1,131 @@
+.navbarContainer {
+    background: linear-gradient(to right, #f8f9fa, #e9ecef);
+    border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+    padding: 12px 0;
+}
+
+.navbarBrand {
+    font-family: 'Georgia', serif;
+    font-weight: 600;
+    font-size: 1.5rem;
+    color: #2c3e50;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.brandLogo {
+    transition: transform 0.3s ease;
+    max-width: 100px;
+}
+
+.navbarBrand:hover .brandLogo {
+    transform: scale(1.05);
+}
+
+.navLink {
+    font-weight: 500;
+    color: #495057;
+    padding: 8px 16px;
+    margin: 0 2px;
+    border-radius: 4px;
+    transition: all 0.3s ease;
+}
+
+.navLink:hover {
+    color: #007bff;
+    background-color: rgba(0, 123, 255, 0.1);
+}
+
+.navLinkActive {
+    color: #007bff;
+    background-color: rgba(0, 123, 255, 0.1);
+}
+
+.loginButton {
+    color: #28a745;
+    border-color: #28a745;
+    border-radius: 20px;
+    padding: 6px 15px;
+    font-weight: 500;
+    transition: all 0.3s ease;
+}
+
+.loginButton:hover {
+    background-color: #28a745;
+    color: white;
+}
+
+.logoutButton {
+    color: #dc3545;
+    border-color: #dc3545;
+    border-radius: 20px;
+    padding: 6px 15px;
+    font-weight: 500;
+    transition: all 0.3s ease;
+}
+
+.logoutButton:hover {
+    background-color: #dc3545;
+    color: white;
+}
+
+.userWelcome {
+    color: #495057;
+    font-weight: 500;
+    padding: 6px 10px;
+    margin-left: 10px;
+    background-color: rgba(108, 117, 125, 0.1);
+    border-radius: 20px;
+}
+
+.icon {
+    margin-right: 5px;
+}
+
+.cartLink {
+    position: relative;
+    color: #495057;
+    padding: 8px 16px;
+    border-radius: 20px;
+    border: 1px solid #dee2e6;
+    transition: all 0.3s ease;
+    margin-left: 12px;
+}
+
+.cartLink:hover {
+    background-color: rgba(0, 123, 255, 0.1);
+    color: #007bff;
+    border-color: #007bff;
+}
+
+.cartLinkSelected {
+    background-color: #007bff;
+    color: white;
+    border-color: #007bff;
+}
+
+.cartCount {
+    font-weight: bold;
+}
+
+/* Responsive adjustments */
+@media (max-width: 992px) {
+    .navLinks {
+        padding-top: 15px;
+    }
+
+    .navActions {
+        margin-top: 15px;
+    }
+
+    .userWelcome {
+        margin: 10px 0;
+        display: block;
+        text-align: center;
+    }
+}
+
+.shadowScrolled {
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}

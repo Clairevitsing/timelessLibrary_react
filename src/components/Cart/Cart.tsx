@@ -6,9 +6,10 @@ import { fetchBooksAsync } from '../../slices/booksSlice';
 import { useNavigate } from 'react-router-dom';
 import { jwtDecode } from 'jwt-decode';
 import { UserProfileToken } from '../../models/User';
-import './Cart.css';
+import styles from './Cart.module.css'; // Import CSS Module
+import { Button, Card, Container, Row, Col, Alert } from 'react-bootstrap'; // Import Bootstrap components
 
-// ✅ Fonction améliorée pour récupérer l'utilisateur depuis le token
+// Function to retrieve user data from the token stored in localStorage
 const getUserFromToken = () => {
   const storedProfile = localStorage.getItem('userProfile');
 
@@ -35,10 +36,9 @@ const getUserFromToken = () => {
     }
 
     console.log('Decoded user:', decoded);
-    
-    // Return the decoded user with necessary properties
-     return {
-      id: decoded.userId,  
+
+    return {
+      id: decoded.userId,
       firstName: decoded.firstName,
       lastName: decoded.lastName,
       userName: decoded.userName,
@@ -52,26 +52,27 @@ const getUserFromToken = () => {
     return null;
   }
 };
+
 const Cart: React.FC = () => {
   const dispatch = useDispatch<AppDispatch>();
   const navigate = useNavigate();
 
-  // ✅ États pour gérer l'authentification
+  // State to manage user authentication
   const [user, setUser] = useState<any>(null);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
 
-  // ✅ Récupération des livres et du panier
+  // Fetch books and cart data from Redux store
   const books = useSelector((state: RootState) => state.books.books);
   const cartBookIds = useSelector((state: RootState) => state.cart.cartBookIds);
   const booksStatus = useSelector((state: RootState) => state.books.status);
 
-  // ✅ États supplémentaires
-  const [bookIds, setBookIds] = useState<number[]>([]); 
+  // Additional states for loading, error, and success messages
+  const [bookIds, setBookIds] = useState<number[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string>('');
 
-  // ✅ Vérification de l'authentification au chargement
+  // Check user authentication on component mount
   useEffect(() => {
     const userData = getUserFromToken();
 
@@ -86,91 +87,93 @@ const Cart: React.FC = () => {
     }
   }, [navigate]);
 
-  // ✅ Charger les livres si nécessaire
+  // Fetch books if not already loaded
   useEffect(() => {
     if (booksStatus === 'idle') {
       dispatch(fetchBooksAsync());
     }
   }, [dispatch, booksStatus]);
 
-  // ✅ Mettre à jour les IDs des livres dans le panier
+  // Update book IDs in the cart
   useEffect(() => {
     setBookIds(cartBookIds);
   }, [cartBookIds]);
 
-  // ✅ Redirection si l'utilisateur n'est pas authentifié
+  // Redirect if user is not authenticated
   if (!isAuthenticated) {
     return <div>Redirecting to login...</div>;
   }
 
-  // ✅ Filtrer les livres présents dans le panier
+  // Filter books that are in the cart
   const cartBookData = books.filter((book) => cartBookIds.includes(book.id));
 
+  // Handle removing a book from the cart
   const handleRemove = (id: number) => {
     dispatch(removeFromCart(id));
   };
 
-const handleConfirmBorrowing = () => {
-  if (!user) {
-    console.error('User not found');
-    navigate('/login');
-    return;
-  }
+  // Handle confirming borrowing
+  const handleConfirmBorrowing = () => {
+    if (!user) {
+      console.error('User not found');
+      navigate('/login');
+      return;
+    }
 
-  console.log("User before navigation:", user);
+    const loanDate = new Date();
+    const dueDate = new Date();
+    dueDate.setDate(loanDate.getDate() + 14);
 
-  const loanDate = new Date();
-  const dueDate = new Date();
-  dueDate.setDate(loanDate.getDate() + 14);
-
-  // Pass the decoded user object directly
-  navigate('/loanDetailsPage', {
-    state: {
-      books: cartBookData,
-      user: user,
-      loanDate: loanDate.toISOString().split('T')[0],
-      dueDate: dueDate.toISOString().split('T')[0],
-    },
-  });
-};
+    // Navigate to loan details page with book and user data
+    navigate('/loanDetailsPage', {
+      state: {
+        books: cartBookData,
+        user: user,
+        loanDate: loanDate.toISOString().split('T')[0],
+        dueDate: dueDate.toISOString().split('T')[0],
+      },
+    });
+  };
 
   return (
-    <div className="cart-container">
+    <div className={styles.cartContainer}>
     {booksStatus === 'loading' && <div>Loading books...</div>}
     {booksStatus === 'failed' && <div>Error loading books</div>}
 
     {cartBookData.length > 0 ? (
-      <div className="cart-content">
-        <div className="cart-items">
-          {cartBookData.map((book) => (
-            <div key={book.id} className="cart-item">
-              <img className="item-image" src={book.image} alt={book.title} />
-              <div className="item-info">
-                <h4>{book.title}</h4>
-                <p>{book.ISBN}</p>
-                <button className="remove-btn" onClick={() => handleRemove(book.id)}>❌ Remove</button>
-              </div>
+        <div className={styles.cartContent}>
+            <div className={styles.cartItems}>
+                {cartBookData.map((book) => (
+                    <div key={book.id} className={styles.cartItem}>
+                        <img className={styles.itemImage} src={book.image} alt={book.title} />
+                        <div className={styles.itemInfo}>
+                            <h4>{book.title}</h4>
+                            <p>{book.ISBN}</p>
+                        </div>
+                        <button className={styles.removeBtn} onClick={() => handleRemove(book.id)}>
+                            ❌ Remove
+                        </button>
+                    </div>
+                ))}
             </div>
-          ))}
+
+            <div className={styles.cartSummary}>
+                <h3>Your Borrowing Summary</h3>
+                <p>Total Items: {cartBookData.length}</p>
+                <button className={styles.validateBtn} onClick={handleConfirmBorrowing}>
+                    📚 Confirm Borrowing
+                </button>
+            </div>
         </div>
-
-      <div className="cart-summary">
-        <h3>Your Borrowing Summary</h3>
-        <p>Total Items: {cartBookData.length}</p>
-        <button className="validate-btn" onClick={handleConfirmBorrowing}>
-          📚 Confirm Borrowing
-        </button>
-      </div>
-      </div>
     ) : (
-      <div className="empty-cart">
-        <p>Your cart is empty.</p>
-        <p>You have not added any items yet.</p>
-      </div>
-        )}
-  </div>
-);
+        <div className={styles.emptyCart}>
+            <p>Your cart is empty.</p>
+            <p>You have not added any items yet.</p>
+        </div>
+    )}
+</div>
 
+  );
 };
 
 export default Cart;

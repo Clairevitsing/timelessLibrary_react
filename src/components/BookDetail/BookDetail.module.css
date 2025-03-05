@@ -1,0 +1,105 @@
+:global(body) {
+    background-color: rgb(145, 188, 193)!important;
+    margin: 0;
+    padding: 0;
+}
+
+.bookDetailContainer {
+    padding: 2rem;
+}
+
+.bookCard {
+    max-width: 600px;
+    margin: auto;
+    border: none;
+    border-radius: 10px;
+    overflow: hidden;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.bookImageContainer {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 1rem;
+}
+
+.bookImage {
+    max-height: 300px;
+    width: auto;
+    border-radius: 5px;
+}
+
+.cardBody {
+    padding: 1.5rem;
+}
+
+.cardTitle {
+    font-size: 1.5rem;
+    font-weight: bold;
+    margin-bottom: 1rem;
+    text-align: left;
+    /* Titre aligné à gauche */
+}
+
+.cardText {
+    font-size: 1rem;
+    color: #555;
+    text-align: justify;
+    /* Description justifiée */
+}
+
+.statusContainer {
+    text-align: left;
+    /* Statut aligné à gauche */
+    margin-bottom: 1rem;
+}
+
+.badge {
+    font-size: 0.9rem;
+    padding: 0.5em 0.75em;
+}
+
+.userActions,
+.adminActions {
+    padding: 1rem;
+    border-top: 1px solid #eee;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 1rem;
+    /* Espace entre les boutons */
+}
+
+.btn {
+    font-size: 0.9rem;
+    padding: 0.5rem 1rem;
+}
+
+.btn-primary {
+    background-color: #007bff;
+    border-color: #007bff;
+}
+
+.btn-danger {
+    background-color: #dc3545;
+    border-color: #dc3545;
+}
+
+.btn-secondary {
+    background-color: #6c757d;
+    border-color: #6c757d;
+}
+
+.btn:disabled {
+    opacity: 0.6;
+}
+
+.alert {
+    margin: 1rem 0;
+}
+
+.spinnerBorder {
+    width: 3rem;
+    height: 3rem;
+}

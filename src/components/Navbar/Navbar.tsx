@@ -1,23 +1,21 @@
 import React, { useEffect, useState } from 'react';
-import { Navbar, Nav,  Container } from 'react-bootstrap';
+import { Navbar, Nav, Container } from 'react-bootstrap';
 import { Link } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faSignInAlt, faSignOutAlt, faShoppingCart, faUser } from '@fortawesome/free-solid-svg-icons';
 import { useAuth } from '../../context/useAuth';
 import { useSelector } from "react-redux";
-import { jwtDecode } from "jwt-decode"; 
+import { jwtDecode } from "jwt-decode";
 import logo from '../../assets/logo.png';
-import './Navbar.css';
+import styles from './Navbar.module.css';
 
 const NavbarComponent: React.FC = () => {
   const { user, logout, isLoggedIn } = useAuth();
   const { cartBookIds } = useSelector((state: any) => state.cart || { cartBookIds: [] });
-
   const [username, setUsername] = useState<string>("Utilisateur");
-
+  
   useEffect(() => {
     console.log("Current User State:", user);
-
     if (user?.userName) {
       setUsername(user.userName);
     } else {
@@ -33,49 +31,58 @@ const NavbarComponent: React.FC = () => {
       }
     }
   }, [user]);
+  
+  useEffect(() => {
+    const handleScroll = () => {
+      const navbar = document.querySelector('.navbar');
+      if (window.scrollY > 10) {
+        navbar?.classList.add(styles.shadowScrolled);
+      } else {
+        navbar?.classList.remove(styles.shadowScrolled);
+      }
+    };
+
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
 
   return (
-    <Navbar bg="light" expand="lg" className="py-3 shadow-sm">
+    <Navbar bg="light" expand="lg" className={`py-3 ${styles.navbarContainer}`}>
       <Container>
-        <Navbar.Brand as={Link} to="/">
-          <img src={logo} alt="Timeless Library Logo" className="img-fluid" style={{ maxWidth: '100px' }} />
+        <Navbar.Brand as={Link} to="/" className={styles.navbarBrand}>
+          <img src={logo} alt="Timeless Library Logo" className={`img-fluid ${styles.brandLogo}`} />
           Timeless Library
         </Navbar.Brand>
         <Navbar.Toggle aria-controls="basic-navbar-nav" />
         <Navbar.Collapse id="basic-navbar-nav">
-          <Nav className="mx-auto">
-            <Nav.Link as={Link} to="/">Home</Nav.Link>
-            <Nav.Link as={Link} to="/books">Books</Nav.Link>
-            <Nav.Link as={Link} to="/categories">Categories</Nav.Link>
-            {/* <NavDropdown title="Category" id="basic-nav-dropdown">
-              {["voluptaten", "evenist", "porro", "vel", "ethh", "police"].map((category) => (
-                <NavDropdown.Item as={Link} to={`/category/${category}`} key={category}>
-                  {category}
-                </NavDropdown.Item>
-              ))}
-            </NavDropdown> */}
-            <Nav.Link as={Link} to="/contact">Contact</Nav.Link>
+          <Nav className={`mx-auto ${styles.navLinks}`}>
+            <Nav.Link as={Link} to="/" className={styles.navLink}>Home</Nav.Link>
+            <Nav.Link as={Link} to="/books" className={styles.navLink}>Books</Nav.Link>
+            <Nav.Link as={Link} to="/categories" className={styles.navLink}>Categories</Nav.Link>
+            <Nav.Link as={Link} to="/contact" className={styles.navLink}>Contact</Nav.Link>
           </Nav>
-          <Nav>
+          <Nav className={styles.navActions}>
             {isLoggedIn() ? (
               <>
-                <Nav.Link as={Link} to="/logout" className="btn btn-outline-danger" onClick={logout}>
-                  <FontAwesomeIcon icon={faSignOutAlt} className="me-1" />
-                  Logout
+                <Nav.Link as={Link} to="/logout" className={`btn ${styles.logoutButton}`} onClick={logout}>
+                  <FontAwesomeIcon icon={faSignOutAlt} className={styles.icon} /> Logout
                 </Nav.Link>
-                <span className="navbar-text ms-2">
-                  <FontAwesomeIcon icon={faUser} className="me-1" />
-                  Welcome, {username}
+                <span className={styles.userWelcome}>
+                  <FontAwesomeIcon icon={faUser} className={styles.icon} /> Welcome, {username}
                 </span>
               </>
             ) : (
-              <Nav.Link as={Link} to="/login" className="btn btn-outline-success">
-                <FontAwesomeIcon icon={faSignInAlt} className="me-1" /> Login
+              <Nav.Link as={Link} to="/login" className={`btn ${styles.loginButton}`}>
+                <FontAwesomeIcon icon={faSignInAlt} className={styles.icon} /> Login
               </Nav.Link>
             )}
-            <Nav.Link as={Link} to="/cart" className={`ms-3 ${window.location.pathname === '/cart' ? 'selected' : ''}`}>
-              <FontAwesomeIcon icon={faShoppingCart} className="me-1" />
-              Cart ({cartBookIds?.length || 0})
+            <Nav.Link 
+              as={Link} 
+              to="/cart" 
+              className={`${styles.cartLink} ${window.location.pathname === '/cart' ? styles.cartLinkSelected : ''}`}
+            >
+              <FontAwesomeIcon icon={faShoppingCart} className={styles.icon} /> Cart 
+              <span className={styles.cartCount}>({cartBookIds?.length || 0})</span>
             </Nav.Link>
           </Nav>
         </Navbar.Collapse>

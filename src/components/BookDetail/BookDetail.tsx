@@ -6,7 +6,7 @@ import { useAuth } from '../../context/useAuth';
 import { useSelector, useDispatch } from 'react-redux';
 import { addToCart, removeFromCart } from '../../slices/cartSlice'; 
 import { RootState } from '../../redux/store'; 
-import './BookDetail.css'; 
+import styles from './BookDetail.module.css'; // Importez le CSS Module
 
 const BookDetail: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -58,9 +58,9 @@ const BookDetail: React.FC = () => {
   };
 
   const renderLoadingState = () => (
-    <div className="book-detail-container">
+    <div className={styles.bookDetailContainer}>
       <div className="text-center">
-        <div className="spinner-border" role="status">
+        <div className={`spinner-border ${styles.spinnerBorder}`} role="status">
           <span className="visually-hidden">Loading...</span>
         </div>
         <p className="mt-2">Loading book details...</p>
@@ -69,8 +69,8 @@ const BookDetail: React.FC = () => {
   );
 
   const renderErrorState = () => (
-    <div className="book-detail-container">
-      <div className="alert alert-danger d-flex align-items-center" role="alert">
+    <div className={styles.bookDetailContainer}>
+      <div className={`alert alert-danger ${styles.alert}`} role="alert">
         <i className="bi bi-exclamation-triangle-fill me-2"></i>
         <div>{error}</div>
         <Link to="/books" className="btn btn-sm btn-outline-danger ms-3">Back to Books</Link>
@@ -82,14 +82,14 @@ const BookDetail: React.FC = () => {
     if (!book) return null;
 
     return (
-      <div className="card-body user-actions d-flex justify-content-center gap-2">
+      <div className={`card-body ${styles.userActions}`}>
         {!book.available ? (
           <button className="btn btn-secondary" disabled>
             Unavailable
           </button>
         ) : !cartBookIds.includes(book.id) ? (
           <button 
-            className="btn btn-primary" 
+            className={`btn btn-primary ${styles.btn}`} 
             onClick={() => dispatch(addToCart(book.id))}
             aria-label="Add book to cart"
           >
@@ -97,7 +97,7 @@ const BookDetail: React.FC = () => {
           </button>
         ) : (
           <button 
-            className="btn btn-danger" 
+            className={`btn btn-danger ${styles.btn}`} 
             onClick={() => dispatch(removeFromCart(book.id))}
             aria-label="Remove book from cart"
           >
@@ -112,17 +112,17 @@ const BookDetail: React.FC = () => {
     if (!book || !isAdmin) return null;
 
     return (
-      <div className="card-body admin-actions d-flex justify-content-center gap-2">
+      <div className={`card-body ${styles.adminActions}`}>
         <button 
           onClick={() => navigate(`/books/${book.id}/edit`)} 
-          className="btn btn-secondary"
+          className={`btn btn-secondary ${styles.btn}`}
           aria-label="Edit book"
         >
           <i className="bi bi-pencil me-2"></i>Edit
         </button>
         <button 
           onClick={handleDeleteBook} 
-          className="btn btn-danger"
+          className={`btn btn-danger ${styles.btn}`}
           aria-label="Delete book"
         >
           <i className="bi bi-trash me-2"></i>Delete
@@ -136,35 +136,33 @@ const BookDetail: React.FC = () => {
   if (!book) return renderLoadingState();
 
   return (
-    <div className="book-detail-container">
+    <div className={styles.bookDetailContainer}>
       <div className="container mt-4 d-flex justify-content-center align-items-center">
-        <div className="card h-100 shadow-sm book-card">
-          <div className="px-3 pt-3">
-            <div className="book-image-container text-center">
-              <img 
-                src={book.image || '/placeholder-book.jpg'} 
-                className="img-fluid book-image max-height-300" 
-                alt={book.title} 
-                onError={(e) => {
-                  const imgElement = e.target as HTMLImageElement;
-                  imgElement.src = '/placeholder-book.jpg';
-                }}
-              />
-            </div>
+        <div className={`card h-100 shadow-sm ${styles.bookCard}`}>
+          <div className={styles.bookImageContainer}>
+            <img 
+              src={book.image || '/placeholder-book.jpg'} 
+              className={`img-fluid ${styles.bookImage}`} 
+              alt={book.title} 
+              onError={(e) => {
+                const imgElement = e.target as HTMLImageElement;
+                imgElement.src = '/placeholder-book.jpg';
+              }}
+            />
           </div>
 
-          <div className="card-body">
-            <h5 className="card-title">{book.title}</h5>
-            <p className="card-text">{book.description || 'No description available.'}</p>
-            <p className="card-text">
+          <div className={`card-body ${styles.cardBody}`}>
+            <h5 className={`card-title ${styles.cardTitle}`}>{book.title}</h5>
+            <p className={`card-text ${styles.cardText}`}>{book.description || 'No description available.'}</p>
+            <div className={styles.statusContainer}>
               <strong>Status:</strong>{' '}
               <span className={`badge ${book.available ? 'bg-success' : 'bg-warning'}`}>
                 {book.available ? 'Available' : 'Unavailable'}
               </span>
-            </p>
+            </div>
           </div>
 
-          <div className="book-details">
+          <div className={styles.bookDetails}>
             <div className="card-header">Authors</div>
             <ul className="list-group list-group-flush">
               {book.authors.length > 0 ? (
