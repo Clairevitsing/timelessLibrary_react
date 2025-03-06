@@ -1,0 +1,140 @@
+:global(body) {
+    background-color: rgb(145, 188, 193);
+    margin: 0;
+    padding: 0;
+}
+
+.container {
+    max-width: 1200px;
+    margin: 2rem auto;
+    padding: 2rem;
+    background-color: #f8f9fa;
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+}
+
+.categoryTitle {
+    color: #343a40;
+    font-weight: 600;
+    margin-bottom: 2rem;
+    text-transform: capitalize;
+    position: relative;
+    padding-bottom: 0.5rem;
+    text-align: center;
+}
+
+.categoryTitle::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 100px;
+    height: 3px;
+    background-color: #007bff;
+}
+
+.row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1.5rem;
+    justify-content: center;
+}
+
+.bookCard {
+    transition: all 0.3s ease;
+    border-radius: 10px;
+    overflow: hidden;
+    background-color: #ffffff;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    width: 260px;
+    display: flex;
+    flex-direction: column;
+}
+
+.bookCard:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.15);
+}
+
+.bookImage {
+    height: 250px;
+    object-fit: contain;
+    width: 100%;
+    transition: transform 0.3s ease;
+    padding-top: 1rem;
+}
+
+.bookCard:hover .bookImage {
+    transform: scale(1.05);
+}
+
+.card-body {
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+.bookTitle {
+    color: #212529;
+    font-size: 1.2rem;
+    font-weight: 600;
+    margin-top: 1rem;
+    margin-bottom: 0.5rem;
+}
+
+.authorsList {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.authorItem {
+    padding: 0.25rem 0;
+    color: #6c757d;
+}
+
+.cardFooter {
+    background-color: #f1f3f5;
+    border-top: 1px solid #e9ecef;
+    display: flex;
+    justify-content: space-between;
+    padding: 0.75rem;
+}
+
+.actionButton {
+    transition: all 0.2s ease;
+    padding: 0.5rem 1rem;
+}
+
+.actionButton:hover {
+    transform: scale(1.05);
+}
+
+.emptyState {
+    text-align: center;
+    padding: 3rem;
+    background-color: #f8f9fa;
+    border-radius: 10px;
+    font-size: 1.2rem;
+    font-weight: bold;
+}
+
+.loadingSpinner {
+    color: #007bff;
+    width: 3rem;
+    height: 3rem;
+}
+
+.errorAlert {
+    background-color: #f8d7da;
+    border-color: #f5c6cb;
+    color: #721c24;
+    padding: 1rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-radius: 5px;
+}

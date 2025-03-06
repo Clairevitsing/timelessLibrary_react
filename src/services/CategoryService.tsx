@@ -1,5 +1,6 @@
 import axios from 'axios';
 import { Category } from '../models/Category'; 
+import { Book } from '../models/Book'; 
 
 const BASE_API_URL = "http://127.0.0.1:8000/api/categories";
 
@@ -63,6 +64,20 @@ export const deleteCategory = async (categoryId: number): Promise<void> => {
     await axios.delete(`${BASE_API_URL}/${categoryId}`);
   } catch (error) {
     console.error('Error deleting category:', error);
+    throw error;
+  }
+};
+
+export const fetchBooksByCategory = async (categoryId: number): Promise<Book[]> => {
+  try {
+    const response = await axios.get(`${BASE_API_URL}/${categoryId}/books`);
+    return response.data;
+  } catch (error) {
+    if (axios.isAxiosError(error) && error.response?.status === 404) {
+      // Return an empty array if no books are found
+      return [];
+    }
+    console.error('Error fetching books by category:', error);
     throw error;
   }
 };

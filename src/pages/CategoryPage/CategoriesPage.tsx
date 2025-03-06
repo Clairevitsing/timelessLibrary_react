@@ -1,11 +1,9 @@
 import React, { useEffect, useState } from 'react';
-import { fetchCategories, deleteCategory } from '../../services/CategoryService';
-import { fetchBooksByCategory } from '../../services/BookService';
+import { fetchCategories, fetchBooksByCategory,deleteCategory } from '../../services/CategoryService';
 import { Category } from '../../models/Category';
 import { generateColor } from '../../utils/colorGenerator';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/useAuth';
-import styles from './CategoriesPage.module.css'; // Importez le module CSS
 
 const CategoriesPage: React.FC = () => {
   const [categories, setCategories] = useState<Category[]>([]);
@@ -23,6 +21,7 @@ const CategoriesPage: React.FC = () => {
       try {
         const categoriesData = await fetchCategories();
         setCategories(categoriesData);
+        console.log(categoriesData);
 
         // Fetch book counts for each category
         const bookCountPromises = categoriesData.map(async (category) => {
@@ -75,7 +74,7 @@ const CategoriesPage: React.FC = () => {
   };
 
   const renderLoadingState = () => (
-    <div className={styles.container}>
+    <div className="container py-5">
       <div className="text-center">
         <div className="spinner-border" role="status">
           <span className="visually-hidden">Loading categories...</span>
@@ -86,15 +85,15 @@ const CategoriesPage: React.FC = () => {
   );
 
   const renderErrorState = () => (
-    <div className={styles.container}>
+    <div className="container py-5">
       <div className="alert alert-danger d-flex align-items-center" role="alert">
         <i className="bi bi-exclamation-triangle-fill me-2"></i>
         <div>{error}</div>
         <button 
-          onClick={() => navigate('/dashboard')} 
+          onClick={() => navigate('/')} 
           className="btn btn-sm btn-outline-danger ms-3"
         >
-          Back to Dashboard
+          Back to Homepage
         </button>
       </div>
     </div>
@@ -107,16 +106,16 @@ const CategoriesPage: React.FC = () => {
     return (
       <div key={category.id} className="col-12 col-sm-6 col-md-4 col-lg-3">
         <div 
-          className={`${styles.card} card h-100 shadow-sm hover-shadow-lg transition-all`}
+          className="card h-100 shadow-sm hover-shadow-lg transition-all"
           style={{ borderLeft: `5px solid ${backgroundColor}` }}
         >
           <div 
-            className={`${styles.cardHeader} card-header text-white text-center py-3`}
+            className="card-header text-white text-center py-3"
             style={{ backgroundColor }}
           >
             <h2 className="card-title mb-0">{category.name}</h2>
           </div>
-          <div className={styles.cardBody}>
+          <div className="card-body">
             <p className="card-text text-muted">
               {category.description || 'No description available'}
             </p>
@@ -126,7 +125,7 @@ const CategoriesPage: React.FC = () => {
               </span>
             </div>
           </div>
-          <div className={`${styles.cardFooter} card-footer d-flex justify-content-between`}>
+          <div className="card-footer d-flex justify-content-between">
             <Link 
               to={`/categories/${category.id}/books`} 
               className={`btn btn-sm btn-info ${bookCount === 0 ? 'disabled' : ''}`}
@@ -161,7 +160,7 @@ const CategoriesPage: React.FC = () => {
   };
 
   const renderEmptyState = () => (
-    <div className={styles.container + " text-center"}>
+    <div className="container py-5 text-center">
       <p>No categories found.</p>
       {isAdmin && (
         <Link 
@@ -176,7 +175,7 @@ const CategoriesPage: React.FC = () => {
   );
 
   return (
-    <div className={styles.container}>
+    <div className="container py-5">
       <div className="d-flex justify-content-between align-items-center mb-4">
         <div className="flex-grow-1 d-flex justify-content-center">
           <h1 className="text-center">All Categories</h1>

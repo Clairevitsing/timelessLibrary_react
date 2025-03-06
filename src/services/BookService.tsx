@@ -309,17 +309,4 @@ export const deleteBook = async (bookId: number): Promise<boolean> => {
   }
 };
 
-export const fetchBooksByCategory = async (categoryId: number): Promise<Book[]> => {
-  try {
-    const response = await axios.get(`${BASE_API_URL}/category/${categoryId}`);
-    return response.data;
-  } catch (error) {
-    if (axios.isAxiosError(error) && error.response?.status === 404) {
-      // Return an empty array if no books are found
-      return [];
-    }
-    console.error('Error fetching books by category:', error);
-    throw error;
-  }
-};
 

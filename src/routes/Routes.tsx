@@ -13,7 +13,7 @@ import EditBookPage from "../pages/EditBookPage/EditBookPage";
 import Cart from "../components/Cart/Cart";
 import LoanDetails from "../components/Loan/LoanDetails";
 import LoanDetailsPage from "../pages/LoanDetailsPage/LoanDetailsPage";
-import CategoryBooks from "../components/Categories/Categories";
+import CategoryBooks from "../components/CategoryBooks/CategoryBooks";
 import CreateCategoryForm from "../components/CreateCategoryForm/CreateCategoryForm";
 import EditCategoryForm from "../components/EditCategoryForm/EditCategoryForm";
 

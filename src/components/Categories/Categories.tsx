@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { fetchCategories, deleteCategory } from '../../services/CategoryService';
-import { fetchBooksByCategory } from '../../services/BookService';
+import { fetchBooksByCategory } from '../../services/CategoryService';
 import { Category } from '../../models/Category';
 import { generateColor } from '../../utils/colorGenerator';
 import { Link, useNavigate } from 'react-router-dom';
@@ -14,7 +14,7 @@ const CategoriesPage: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const { user } = useAuth();
   const navigate = useNavigate();
-
+  
   const isAdmin = user?.roles?.includes('ROLE_ADMIN') ?? false;
 
   useEffect(() => {
@@ -85,7 +85,6 @@ const CategoriesPage: React.FC = () => {
   const renderErrorState = () => (
     <div className={styles.container}>
       <div className={`${styles.alert} ${styles.alertDanger} d-flex align-items-center`} role="alert">
-        <i className={`${styles.icon} bi bi-exclamation-triangle-fill`}></i>
         <div>{error}</div>
         <button 
           onClick={() => navigate('/dashboard')} 
@@ -98,62 +97,60 @@ const CategoriesPage: React.FC = () => {
   );
 
   const renderCategoryCard = (category: Category) => {
-  const backgroundColor = generateColor(category.name);
-  const bookCount = bookCounts[category.id] || 0;
+    const backgroundColor = generateColor(category.name);
+    const bookCount = bookCounts[category.id] || 0;
 
-  return (
-    <div key={category.id} className={styles.card} style={{ borderLeftColor: backgroundColor }}>
-      <div 
-        className={styles.cardHeader}
-        style={{ backgroundColor }}
-      >
-        <h2 className={styles.cardTitle}>{category.name}</h2>
-      </div>
-      <div className={styles.cardBody}>
-        <p className={styles.cardText}>
-          {category.description || 'No description available'}
-        </p>
-        <div className={styles.cardStats}>
-          <span className={styles.badge}>
-            {bookCount} Book{bookCount !== 1 ? 's' : ''}
-          </span>
+    return (
+      <div key={category.id} className={styles.card} style={{ borderLeftColor: backgroundColor }}>
+        <div className={styles.cardHeader} style={{ backgroundColor }}>
+          <h2 className={styles.cardTitle}>{category.name}</h2>
         </div>
-      </div>
-      <div className={styles.cardFooter}>
-        <div className={styles.buttonRow}>
-          <Link 
-            to={`/categories/${category.id}/books`} 
-            className={`${styles.btn} ${styles.btnInfo} ${bookCount === 0 ? styles.disabled : ''}`}
-            aria-label={`View ${bookCount} books in ${category.name} category`}
-          >
-            <i className={`${styles.icon} bi bi-book`}></i>
-            Books {bookCount > 0 ? `(${bookCount})` : ''}
-          </Link>
-        </div>
-        {isAdmin && (
-          <div className={styles.buttonRow}>
-            <Link 
-              to={`/categories/${category.id}/edit`} 
-              className={`${styles.btn} ${styles.btnWarning}`}
-              aria-label={`Edit ${category.name} category`}
-            >
-              <i className={`${styles.icon} bi bi-pencil`}></i>Edit
-            </Link>
-            <button 
-              onClick={() => handleDeleteCategory(category.id)}
-              className={`${styles.btn} ${styles.btnDanger}`}
-              aria-label={`Delete ${category.name} category`}
-              disabled={bookCount > 0}
-            >
-              <i className={`${styles.icon} bi bi-trash`}></i>Delete
-            </button>
+        <div className={styles.cardBody}>
+          <p className={styles.cardText}>
+            {category.description || 'No description available'}
+          </p>
+          <div className={styles.cardStats}>
+            <span className={styles.badge}>
+              {bookCount} Book{bookCount !== 1 ? 's' : ''}
+            </span>
           </div>
-        )}
-      </div>
-    </div>
-  );
-};
+        </div>
+        <div className={styles.cardFooter}>
+          {/* Première ligne - Bouton Books */}
+          <div className={styles.bookButton}>
+            <Link  
+              to={`/categories/${category.id}/books`}  
+              className={`${styles.btn} ${styles.btnInfo} ${bookCount === 0 ? styles.disabled : ''}`} 
+              aria-label={`View ${bookCount} books in ${category.name} category`} 
+            > 
+              Books {bookCount > 0 ? `(${bookCount})` : ''} 
+            </Link>
+          </div>
 
+          {/* Deuxième ligne - Boutons Edit et Delete */}
+          {isAdmin && (
+            <div className={styles.adminButtons}>
+              <Link  
+                to={`/categories/${category.id}/edit`}  
+                className={`${styles.btn} ${styles.btnWarning}`} 
+                aria-label={`Edit ${category.name} category`} 
+              >
+                Edit
+              </Link>
+              <button  
+                onClick={() => handleDeleteCategory(category.id)} 
+                className={`${styles.btn} ${styles.btnDanger}`} 
+                aria-label={`Delete ${category.name} category`} 
+                disabled={bookCount > 0} 
+              > 
+                Delete
+              </button>
+            </div>
+          )}
+        </div>
+      </div>
+    );
+  };
 
   const renderEmptyState = () => (
     <div className={`${styles.container} text-center`}>
@@ -164,7 +161,7 @@ const CategoriesPage: React.FC = () => {
           className={`${styles.btn} ${styles.btnPrimary}`}
           aria-label="Add new category"
         >
-          <i className={`${styles.icon} bi bi-plus-circle`}></i>Add First Category
+          Add First Category
         </Link>
       )}
     </div>
@@ -180,10 +177,10 @@ const CategoriesPage: React.FC = () => {
           <div>
             <Link 
               to="/categories/new" 
-              className={`${styles.btn} ${styles.btnPrimary}`}
+              className={`${styles.btn} ${styles.btnAdd}`}
               aria-label="Add new category"
             >
-              <i className={`${styles.icon} bi bi-plus-circle`}></i>Add New Category
+              Add New Category
             </Link>
           </div>
         )}
