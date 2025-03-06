@@ -71,7 +71,7 @@ export const deleteCategory = async (categoryId: number): Promise<void> => {
 export const fetchBooksByCategory = async (categoryId: number): Promise<Book[]> => {
   try {
     const response = await axios.get(`${BASE_API_URL}/${categoryId}/books`);
-    return response.data;
+    return response.data.books; 
   } catch (error) {
     if (axios.isAxiosError(error) && error.response?.status === 404) {
       // Return an empty array if no books are found

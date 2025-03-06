@@ -155,7 +155,7 @@
 
 .cartLinkSelected {
     background-color: #007bff;
-    color: white !important;
+    color: rgb(10, 9, 9) !important;
     border-color: #007bff;
     box-shadow: 0 4px 8px rgba(0, 123, 255, 0.2);
 }

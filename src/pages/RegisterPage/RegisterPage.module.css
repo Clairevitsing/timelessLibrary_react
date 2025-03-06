@@ -4,6 +4,8 @@
     align-items: center;
     height: 100vh;
     background-color: rgb(145, 188, 193);
+    margin-top: 20px;
+    margin-bottom: 20px;
 }
 
 .formWrapper {

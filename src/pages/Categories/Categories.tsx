@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { fetchCategories, deleteCategory } from '../../services/CategoryService';
-import { fetchBooksByCategory } from '../../services/CategoryService';
+import { fetchCategories, deleteCategory,fetchBooksByCategory } from '../../services/CategoryService';
 import { Category } from '../../models/Category';
 import { generateColor } from '../../utils/colorGenerator';
 import { Link, useNavigate } from 'react-router-dom';

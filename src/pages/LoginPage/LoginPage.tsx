@@ -46,7 +46,7 @@ const LoginPage: React.FC<Props> = () => {
             className="min-vh-80 d-flex align-items-center" 
             style={{ backgroundColor: "rgb(145, 188, 193)" }} 
         >
-                <div className="container"  style={{ backgroundColor: "rgb(145, 188, 193)" }}>
+                <div className="container mb-5"  style={{ backgroundColor: "rgb(145, 188, 193)" }}>
                 <div className="row justify-content-center mt-5">
                     <div 
                         className="col-md-6 col-sm-8 col-10 rounded shadow-lg p-4 border text-white" 

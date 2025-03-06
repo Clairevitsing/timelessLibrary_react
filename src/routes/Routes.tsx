@@ -7,6 +7,7 @@ import Contact from "../pages/Contact/Contact";
 import LoginPage from "../pages/LoginPage/LoginPage";
 import RegisterPage from "../pages/RegisterPage/RegisterPage";
 import CategoryPage from "../pages/CategoryPage/CategoriesPage";
+// import CategoriesPage from "../pages/Categories/Categories";
 import BookDetail from "../components/BookDetail/BookDetail";
 import CreateBookForm from "../pages/CreateBookForm/CreateBookForm";
 import EditBookPage from "../pages/EditBookPage/EditBookPage";
