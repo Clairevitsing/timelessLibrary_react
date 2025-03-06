@@ -1,118 +1,91 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { fetchNewBooks } from '../../services/BookService';
 import { Book } from '../../models/Book';
 import { useNavigate } from 'react-router-dom';
+import styles from './NewBooks.module.css';
+
+// Number of books visible at once
+const booksPerView = 4;
 
 const NewBooks: React.FC = () => {
     const [books, setBooks] = useState<Book[]>([]);
+    const [currentIndex, setCurrentIndex] = useState(0);
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState('');
-    const [currentIndex, setCurrentIndex] = useState(0);
-    const carouselRef = useRef<HTMLDivElement>(null);
     const navigate = useNavigate();
-    
-    // Number of books to display at once
-    const booksPerView = 4;
-    
+
     useEffect(() => {
-        fetchNewBooks().then(books => {
-            setBooks(books);
-            setIsLoading(false);
-        }).catch(error => {
-            setError('Failed to load books');
-            setIsLoading(false);
-        });
+        const loadBooks = async () => {
+            try {
+                const fetchedBooks = await fetchNewBooks();
+                setBooks(fetchedBooks);
+            } catch {
+                setError('Failed to load books');
+            } finally {
+                setIsLoading(false);
+            }
+        };
+        loadBooks();
     }, []);
-    
+
+    // Only display the books within the current index range
+    const visibleBooks = useMemo(() => books.slice(currentIndex, currentIndex + booksPerView), [books, currentIndex]);
+
+    // Navigate to book details page
+    const handleDetailsClick = (id: number) => navigate(`/books/${id}`);
+
+    // Move to the next slide if possible
+    const nextSlide = () => setCurrentIndex((prev) => Math.min(prev + 1, books.length - booksPerView));
+
+    // Move to the previous slide if possible
+    const prevSlide = () => setCurrentIndex((prev) => Math.max(prev - 1, 0));
+
     if (isLoading) return <div className="container text-center mt-5"><div className="spinner-border" role="status"></div></div>;
     if (error) return <div className="container alert alert-danger mt-5">{error}</div>;
-    
-    const handleDetailsClick = (id: number) => {
-        navigate(`/books/${id}`);
-    };
-    
-    const nextSlide = () => {
-        if (currentIndex + booksPerView < books.length) {
-            setCurrentIndex(prevIndex => prevIndex + 1);
-        }
-    };
-    
-    const prevSlide = () => {
-        if (currentIndex > 0) {
-            setCurrentIndex(prevIndex => prevIndex - 1);
-        }
-    };
-    
-    // Calculate if arrows should be visible
-    const canGoBack = currentIndex > 0;
-    const canGoForward = currentIndex + booksPerView < books.length;
-    
+
     return (
-        <div className="container mt-5">
-            <div className="d-flex justify-content-between align-items-center mb-4">
+        <div className={`container ${styles.newBooksContainer}`}>
+            <div className={styles.headerContainer}>
                 <h2>New Books</h2>
             </div>
-            
+
             <div className="position-relative">
                 {/* Left navigation arrow */}
-                {canGoBack && (
-                    <button 
-                        className="position-absolute top-50 start-0 translate-middle-y z-1 bg-white rounded-circle border-0 shadow" 
-                        style={{ 
-                            width: '40px', 
-                            height: '40px', 
-                            marginLeft: '-20px', 
-                            cursor: 'pointer',
-                            display: 'flex',
-                            justifyContent: 'center',
-                            alignItems: 'center'
-                        }}
-                        onClick={prevSlide}
-                    >
-                        <span style={{ fontSize: '1.5rem' }}>&lsaquo;</span>
+                {currentIndex > 0 && (
+                    <button className={`${styles.navigationButton} ${styles.prevButton}`} onClick={prevSlide} aria-label="Previous books">
+                        <span className={styles.arrowIcon}>&lsaquo;</span>
                     </button>
                 )}
-                
+
                 {/* Carousel container */}
-                <div ref={carouselRef} className="overflow-hidden">
-                    <div 
-                        className="row flex-nowrap" 
-                        style={{ 
-                            transform: `translateX(-${currentIndex * (100 / booksPerView)}%)`,
-                            transition: 'transform 0.5s ease'
-                        }}
-                    >
-                        {books.map(book => (
-                            <div key={book.id} className="col-3 px-2">
-                                <div className="card h-100 shadow-sm">
-                                    <div className="px-3 pt-3">
-                                        <div style={{ 
-                                            height: "200px", 
-                                            display: "flex", 
-                                            alignItems: "center", 
-                                            justifyContent: "center" 
-                                        }}>
-                                            <img 
-                                                src={book.image} 
-                                                className="img-fluid" 
-                                                style={{ maxHeight: "100%", objectFit: "contain" }} 
-                                                alt={book.title} 
-                                            />
-                                        </div>
+                <div className={styles.carouselContainer}>
+                    <div className={styles.booksRow}>
+                        {visibleBooks.map((book) => (
+                            <div key={book.id} className={styles.bookColumn}>
+                                <div className={`card ${styles.bookCard}`}>
+                                    {/* Book image */}
+                                    <div className={styles.imageContainer}>
+                                        <img 
+                                            src={book.image || '/placeholder-book.jpg'} 
+                                            className={styles.bookImage} 
+                                            alt={book.title}
+                                            onError={(e) => (e.currentTarget.src = '/placeholder-book.jpg')}
+                                        />
                                     </div>
-                                    <div className="card-body">
-                                        <h5 className="card-title text-truncate" title={book.title}>{book.title}</h5>
-                                        <ul className="list-unstyled">
-                                            {book.authors.map(author => (
-                                                <li key={author.id} className="text-truncate">
+                                    {/* Book details */}
+                                    <div className={styles.bookContent}>
+                                        <h5 className={styles.bookTitle} title={book.title}>
+                                            {book.title}
+                                        </h5>
+                                        <div className="card-header">Authors</div>
+                                        <ul className={`list-unstyled ${styles.authorsList}`}>
+                                            {book.authors.map((author) => (
+                                                <li key={author.id} className={styles.authorName}>
                                                     {author.firstName} {author.lastName}
                                                 </li>
                                             ))}
                                         </ul>
-                                        <button 
-                                            className="btn btn-primary mt-2 w-100" 
-                                            onClick={() => handleDetailsClick(book.id)}
-                                        >
+                                        <button className={`btn btn-primary ${styles.detailsButton}`} onClick={() => handleDetailsClick(book.id)}>
                                             Details
                                         </button>
                                     </div>
@@ -121,23 +94,11 @@ const NewBooks: React.FC = () => {
                         ))}
                     </div>
                 </div>
-                
+
                 {/* Right navigation arrow */}
-                {canGoForward && (
-                    <button 
-                        className="position-absolute top-50 end-0 translate-middle-y z-1 bg-white rounded-circle border-0 shadow" 
-                        style={{ 
-                            width: '40px', 
-                            height: '40px', 
-                            marginRight: '-20px', 
-                            cursor: 'pointer',
-                            display: 'flex',
-                            justifyContent: 'center',
-                            alignItems: 'center'
-                        }}
-                        onClick={nextSlide}
-                    >
-                        <span style={{ fontSize: '1.5rem' }}>&rsaquo;</span>
+                {currentIndex + booksPerView < books.length && (
+                    <button className={`${styles.navigationButton} ${styles.nextButton}`} onClick={nextSlide} aria-label="Next books">
+                        <span className={styles.arrowIcon}>&rsaquo;</span>
                     </button>
                 )}
             </div>

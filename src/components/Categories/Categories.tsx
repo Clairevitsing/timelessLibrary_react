@@ -5,7 +5,7 @@ import { Category } from '../../models/Category';
 import { generateColor } from '../../utils/colorGenerator';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/useAuth';
-import styles from './CategoriesPage.module.css'; // Importez le module CSS
+import styles from './Categories.module.css';
 
 const CategoriesPage: React.FC = () => {
   const [categories, setCategories] = useState<Category[]>([]);
@@ -15,7 +15,6 @@ const CategoriesPage: React.FC = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
 
-  // Check if user is an admin
   const isAdmin = user?.roles?.includes('ROLE_ADMIN') ?? false;
 
   useEffect(() => {
@@ -24,7 +23,6 @@ const CategoriesPage: React.FC = () => {
         const categoriesData = await fetchCategories();
         setCategories(categoriesData);
 
-        // Fetch book counts for each category
         const bookCountPromises = categoriesData.map(async (category) => {
           try {
             const books = await fetchBooksByCategory(category.id);
@@ -60,7 +58,6 @@ const CategoriesPage: React.FC = () => {
     try {
       await deleteCategory(categoryId);
       setCategories(categories.filter(category => category.id !== categoryId));
-      // Remove the book count for the deleted category
       setBookCounts(prev => {
         const newCounts = { ...prev };
         delete newCounts[categoryId];
@@ -77,7 +74,7 @@ const CategoriesPage: React.FC = () => {
   const renderLoadingState = () => (
     <div className={styles.container}>
       <div className="text-center">
-        <div className="spinner-border" role="status">
+        <div className={`${styles.loadingSpinner} spinner-border`} role="status">
           <span className="visually-hidden">Loading categories...</span>
         </div>
         <p className="mt-2">Loading categories...</p>
@@ -87,12 +84,12 @@ const CategoriesPage: React.FC = () => {
 
   const renderErrorState = () => (
     <div className={styles.container}>
-      <div className="alert alert-danger d-flex align-items-center" role="alert">
-        <i className="bi bi-exclamation-triangle-fill me-2"></i>
+      <div className={`${styles.alert} ${styles.alertDanger} d-flex align-items-center`} role="alert">
+        <i className={`${styles.icon} bi bi-exclamation-triangle-fill`}></i>
         <div>{error}</div>
         <button 
           onClick={() => navigate('/dashboard')} 
-          className="btn btn-sm btn-outline-danger ms-3"
+          className={`${styles.btn} ${styles.btnDanger} ms-3`}
         >
           Back to Dashboard
         </button>
@@ -101,75 +98,73 @@ const CategoriesPage: React.FC = () => {
   );
 
   const renderCategoryCard = (category: Category) => {
-    const backgroundColor = generateColor(category.name);
-    const bookCount = bookCounts[category.id] || 0;
+  const backgroundColor = generateColor(category.name);
+  const bookCount = bookCounts[category.id] || 0;
 
-    return (
-      <div key={category.id} className="col-12 col-sm-6 col-md-4 col-lg-3">
-        <div 
-          className={`${styles.card} card h-100 shadow-sm hover-shadow-lg transition-all`}
-          style={{ borderLeft: `5px solid ${backgroundColor}` }}
-        >
-          <div 
-            className={`${styles.cardHeader} card-header text-white text-center py-3`}
-            style={{ backgroundColor }}
-          >
-            <h2 className="card-title mb-0">{category.name}</h2>
-          </div>
-          <div className={styles.cardBody}>
-            <p className="card-text text-muted">
-              {category.description || 'No description available'}
-            </p>
-            <div className="d-flex justify-content-between align-items-center">
-              <span className="badge bg-secondary">
-                {bookCount} Book{bookCount !== 1 ? 's' : ''}
-              </span>
-            </div>
-          </div>
-          <div className={`${styles.cardFooter} card-footer d-flex justify-content-between`}>
-            <Link 
-              to={`/categories/${category.id}/books`} 
-              className={`btn btn-sm btn-info ${bookCount === 0 ? 'disabled' : ''}`}
-              aria-label={`View ${bookCount} books in ${category.name} category`}
-            >
-              <i className="bi bi-book me-2"></i>
-              Books {bookCount > 0 ? `(${bookCount})` : ''}
-            </Link>
-            {isAdmin && (
-              <>
-                <Link 
-                  to={`/categories/${category.id}/edit`} 
-                  className="btn btn-sm btn-warning"
-                  aria-label={`Edit ${category.name} category`}
-                >
-                  <i className="bi bi-pencil me-2"></i>Edit
-                </Link>
-                <button 
-                  onClick={() => handleDeleteCategory(category.id)}
-                  className="btn btn-sm btn-danger"
-                  aria-label={`Delete ${category.name} category`}
-                  disabled={bookCount > 0}
-                >
-                  <i className="bi bi-trash me-2"></i>Delete
-                </button>
-              </>
-            )}
-          </div>
+  return (
+    <div key={category.id} className={styles.card} style={{ borderLeftColor: backgroundColor }}>
+      <div 
+        className={styles.cardHeader}
+        style={{ backgroundColor }}
+      >
+        <h2 className={styles.cardTitle}>{category.name}</h2>
+      </div>
+      <div className={styles.cardBody}>
+        <p className={styles.cardText}>
+          {category.description || 'No description available'}
+        </p>
+        <div className={styles.cardStats}>
+          <span className={styles.badge}>
+            {bookCount} Book{bookCount !== 1 ? 's' : ''}
+          </span>
         </div>
       </div>
-    );
-  };
+      <div className={styles.cardFooter}>
+        <div className={styles.buttonRow}>
+          <Link 
+            to={`/categories/${category.id}/books`} 
+            className={`${styles.btn} ${styles.btnInfo} ${bookCount === 0 ? styles.disabled : ''}`}
+            aria-label={`View ${bookCount} books in ${category.name} category`}
+          >
+            <i className={`${styles.icon} bi bi-book`}></i>
+            Books {bookCount > 0 ? `(${bookCount})` : ''}
+          </Link>
+        </div>
+        {isAdmin && (
+          <div className={styles.buttonRow}>
+            <Link 
+              to={`/categories/${category.id}/edit`} 
+              className={`${styles.btn} ${styles.btnWarning}`}
+              aria-label={`Edit ${category.name} category`}
+            >
+              <i className={`${styles.icon} bi bi-pencil`}></i>Edit
+            </Link>
+            <button 
+              onClick={() => handleDeleteCategory(category.id)}
+              className={`${styles.btn} ${styles.btnDanger}`}
+              aria-label={`Delete ${category.name} category`}
+              disabled={bookCount > 0}
+            >
+              <i className={`${styles.icon} bi bi-trash`}></i>Delete
+            </button>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+};
+
 
   const renderEmptyState = () => (
-    <div className={styles.container + " text-center"}>
+    <div className={`${styles.container} text-center`}>
       <p>No categories found.</p>
       {isAdmin && (
         <Link 
           to="/categories/new" 
-          className="btn btn-outline-primary"
+          className={`${styles.btn} ${styles.btnPrimary}`}
           aria-label="Add new category"
         >
-          <i className="bi bi-plus-circle me-2"></i>Add First Category
+          <i className={`${styles.icon} bi bi-plus-circle`}></i>Add First Category
         </Link>
       )}
     </div>
@@ -177,18 +172,18 @@ const CategoriesPage: React.FC = () => {
 
   return (
     <div className={styles.container}>
-      <div className="d-flex justify-content-between align-items-center mb-4">
-        <div className="flex-grow-1 d-flex justify-content-center">
-          <h1 className="text-center">All Categories</h1>
+      <div className={styles.header}>
+        <div className={styles.title}>
+          <h1>All Categories</h1>
         </div>
         {isAdmin && (
           <div>
             <Link 
               to="/categories/new" 
-              className="btn btn-primary"
+              className={`${styles.btn} ${styles.btnPrimary}`}
               aria-label="Add new category"
             >
-              <i className="bi bi-plus-circle me-2"></i>Add New Category
+              <i className={`${styles.icon} bi bi-plus-circle`}></i>Add New Category
             </Link>
           </div>
         )}
@@ -201,7 +196,7 @@ const CategoriesPage: React.FC = () => {
       ) : categories.length === 0 ? (
         renderEmptyState()
       ) : (
-        <div className="row g-4">
+        <div className={styles.cardGrid}>
           {categories.map(renderCategoryCard)}
         </div>
       )}
