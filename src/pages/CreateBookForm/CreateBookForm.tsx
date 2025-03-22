@@ -327,7 +327,7 @@ const CreateBookForm = () => {
       </div>
       <div className={styles.buttonContainer}>
     <button type="submit" disabled={isSubmitting} className={styles.submitButton}>
-        {isSubmitting ? 'Updating...' : 'Update Book'}
+        {isSubmitting ? 'Creating...' : 'Confirm Add New Book'}
     </button>
 </div>
 

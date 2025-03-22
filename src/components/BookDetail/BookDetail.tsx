@@ -6,7 +6,8 @@ import { useAuth } from '../../context/useAuth';
 import { useSelector, useDispatch } from 'react-redux';
 import { addToCart, removeFromCart } from '../../slices/cartSlice'; 
 import { RootState } from '../../redux/store'; 
-import styles from './BookDetail.module.css'; // Importez le CSS Module
+import styles from './BookDetail.module.css'; 
+import bookcover from '../../assets/bookcover.png';
 
 const BookDetail: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -141,12 +142,12 @@ const BookDetail: React.FC = () => {
         <div className={`card h-100 shadow-sm ${styles.bookCard}`}>
           <div className={styles.bookImageContainer}>
             <img 
-              src={book.image || '/placeholder-book.jpg'} 
+              src={book.image || bookcover} 
               className={`img-fluid ${styles.bookImage}`} 
               alt={book.title} 
               onError={(e) => {
                 const imgElement = e.target as HTMLImageElement;
-                imgElement.src = '/placeholder-book.jpg';
+                imgElement.src = bookcover;
               }}
             />
           </div>
