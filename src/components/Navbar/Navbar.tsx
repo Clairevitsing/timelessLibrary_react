@@ -15,7 +15,7 @@ const NavbarComponent: React.FC = () => {
   const [username, setUsername] = useState<string>("Utilisateur");
   
   useEffect(() => {
-    console.log("Current User State:", user);
+    // console.log("Current User State:", user);
     if (user?.userName) {
       setUsername(user.userName);
     } else {
